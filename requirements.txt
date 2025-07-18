@@ -1,0 +1,15 @@
+tqdm
+numpy
+monai
+timm
+numpy
+accelerate
+diffusers
+simpleitk
+torchio
+scipy
+opencv-python
+scikit-image
+torchviz 
+graphviz
+torchinfo
