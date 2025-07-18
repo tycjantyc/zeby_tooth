@@ -68,7 +68,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             accelerator.log(logs, step=global_step)
             global_step += 1
 
-            loss_full += loss.item().detach().cpu()
+            loss_full += loss.item()
 
         loss_full = loss_full/len(train_dataloader)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
@@ -105,7 +105,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
                     #     print("Loss reutrned NaN! Abort!")
                     #     break
 
-                loss_val_full += loss.item().detach().cpu()
+                loss_val_full += loss.item()
 
         if len(val_dataloader) > 0:
             loss_val_full = loss_val_full/len(val_dataloader)
