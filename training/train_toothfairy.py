@@ -108,6 +108,5 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             loss_val_full = loss_val_full/len(val_dataloader)
             print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
 
-        
         tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_{epoch}.pt')
         print("Weights saved!")
