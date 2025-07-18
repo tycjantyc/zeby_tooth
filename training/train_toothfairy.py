@@ -14,7 +14,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
     DEVICE = 'cuda:0'
 
     accelerator = Accelerator(
-        mixed_precision='no',
+        mixed_precision='fp16',
         gradient_accumulation_steps=1
     )
 
@@ -49,6 +49,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             clean_label = clean_label.to(DEVICE)
 
             with accelerator.accumulate(model):
+                optimizer.zero_grad()
                 label_pred = model(clean_images)
 
                 loss = CRITERION(label_pred, clean_label)
@@ -59,7 +60,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
                     
                 optimizer.step()
                 lr_scheduler.step()
-                optimizer.zero_grad()
+                
 
             progress_bar.update(1)
             logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0], "step": global_step}
@@ -67,7 +68,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             accelerator.log(logs, step=global_step)
             global_step += 1
 
-            loss_full += loss.item()
+            loss_full += loss.item().detach().cpu()
 
         loss_full = loss_full/len(train_dataloader)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
@@ -75,34 +76,36 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
         loss_val_full = 0
 
         #Validation phase
-        for step, (image, label) in enumerate(val_dataloader):
+        with tc.no_grad():
+            for step, (image, label) in enumerate(val_dataloader):
 
-            clean_label = F.one_hot(label.long(), num_classes=num_classes)
-            clean_label = clean_label.permute(0, 4, 1, 2, 3).float()
+                clean_label = F.one_hot(label.long(), num_classes=num_classes)
+                clean_label = clean_label.permute(0, 4, 1, 2, 3).float()
 
-            
-
-
-            clean_images = image
-
-            bs = clean_images.shape[0]
-            clean_images = clean_images.to(DEVICE)
-            clean_label = clean_label.to(DEVICE)
-
-            with accelerator.accumulate(model):
-                label_pred = model(clean_images)
-
-                # if tc.isnan(label_pred):
-                #     print("Model reutrned NaN! Abort!")
-                #     break
-
-                loss = CRITERION(label_pred, clean_label)
                 
-                # if tc.isnan(loss.item()):
-                #     print("Loss reutrned NaN! Abort!")
-                #     break
 
-            loss_val_full += loss.item()
+
+                clean_images = image
+
+                bs = clean_images.shape[0]
+                clean_images = clean_images.to(DEVICE)
+                clean_label = clean_label.to(DEVICE)
+
+                with accelerator.accumulate(model):
+            
+                    label_pred = model(clean_images)
+
+                    # if tc.isnan(label_pred):
+                    #     print("Model reutrned NaN! Abort!")
+                    #     break
+
+                    loss = CRITERION(label_pred, clean_label)
+                    
+                    # if tc.isnan(loss.item()):
+                    #     print("Loss reutrned NaN! Abort!")
+                    #     break
+
+                loss_val_full += loss.item().detach().cpu()
 
         if len(val_dataloader) > 0:
             loss_val_full = loss_val_full/len(val_dataloader)
@@ -110,3 +113,5 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
 
         tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_{epoch}.pt')
         print("Weights saved!")
+        tc.cuda.empty_cache()
+        print("Cache emptied!")
