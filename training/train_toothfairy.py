@@ -92,15 +92,15 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             with accelerator.accumulate(model):
                 label_pred = model(clean_images)
 
-                if tc.isnan(label_pred):
-                    print("Model reutrned NaN! Abort!")
-                    break
+                # if tc.isnan(label_pred):
+                #     print("Model reutrned NaN! Abort!")
+                #     break
 
                 loss = CRITERION(label_pred, clean_label)
                 
-                if tc.isnan(loss.item()):
-                    print("Loss reutrned NaN! Abort!")
-                    break
+                # if tc.isnan(loss.item()):
+                #     print("Loss reutrned NaN! Abort!")
+                #     break
 
             loss_val_full += loss.item()
 
