@@ -5,7 +5,6 @@ import os
 
 def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, freeze = True):
 
-    #tooth_fairy_challenge/
     wPATH = "hyspark/ckpt/hybird_ct_pretrained_timm_style_mask75.pth"
 
     model = build_hybird(in_channel=1, n_classes=14, img_size=96)
