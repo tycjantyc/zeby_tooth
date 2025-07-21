@@ -25,6 +25,7 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
     model = model.to(DEVICE)
 
     global_step = 0
+    global_loss = 100
 
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
@@ -111,7 +112,10 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
             loss_val_full = loss_val_full/len(val_dataloader)
             print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
 
-        tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_{epoch}.pt')
-        print("Weights saved!")
+        if loss_val_full < global_loss:
+            tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_best.pt')
+            print(f"Weights saved! - Epoch {epoch}")
+            global_loss = loss_val_full
+
         tc.cuda.empty_cache()
         print("Cache emptied!")

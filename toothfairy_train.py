@@ -29,6 +29,9 @@ def main(data_path = 'D:/ToothFairy3',
     if channels is None:
         channels = []
 
+    elif channels[0] == 'none':
+        channels = []
+
     if prefetch_factor == 0:
         prefetch_factor = None
         
@@ -38,7 +41,7 @@ def main(data_path = 'D:/ToothFairy3',
     norm_func = norm_factory(normalization)
 
     dataset_train = ToothFairy3_Dataset(data_directory=data_path, input_size=(96, 96, 96), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=validation_split)
-    dataset_val = ToothFairy3_Dataset(data_directory=data_path, input_size=(96, 96, 96), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func, augmentation=False, channels=channels, validation_split=validation_split, validation_mode=True)
+    dataset_val = ToothFairy3_Dataset(data_directory=data_path, input_size=(96, 96, 96), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func, augmentation=False, channels=channels, validation_split=validation_split, validation_mode=True, num_samples=8)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=0, pin_memory=False, prefetch_factor=None)
