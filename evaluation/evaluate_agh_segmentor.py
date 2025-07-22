@@ -67,6 +67,8 @@ def evaluate_agh(model:nn.Module,
     counts[counts == 0] = 1
     segmented_volume = output / counts
 
+    del output, counts
+
     #Crop to original
     start = []
     end = []
@@ -76,8 +78,18 @@ def evaluate_agh(model:nn.Module,
     segmented_volume = segmented_volume[:, start[0]:end[0], start[1]:end[1], start[2]:end[2]]
 
     print(segmented_volume.shape)   
-    segmented_volume = np.argmax(segmented_volume, axis=0)
-    print(segmented_volume.shape)
+    
+    labels    = np.zeros(volume.shape, dtype=np.uint8)   
+    best_vals = segmented_volume[0].copy()            
+    for c in range(1, 33):
+        cls_vals = segmented_volume[c]               
+        mask = cls_vals > best_vals
+        labels[mask]    = c
+        best_vals[mask] = cls_vals[mask]
+    del best_vals, segmented_volume                   
+    return labels
 
-    return segmented_volume.astype(np.uint8)
+    #segmented_volume = np.argmax(segmented_volume, axis=0)
+    # print(segmented_volume.shape)
+    # return segmented_volume.astype(np.uint8)
 
