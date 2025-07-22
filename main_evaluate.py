@@ -23,7 +23,7 @@ if __name__ == "__main__":
     stride_shape = (args.stride, args.stride, args.stride)
     input_shape = (args.model_input, args.model_input, args.model_input)
 
-    segmented_volume = evaluate(model = args.model, 
+    segmented_volume = evaluate(model = model, 
                                 file = args.file, 
                                 model_input_shape = input_shape,
                                 stride = stride_shape,
@@ -34,5 +34,3 @@ if __name__ == "__main__":
     affine = np.eye(4)
     nifti_img = nib.Nifti1Image(segmented_volume, affine)
     nib.save(nifti_img, 'evaluation/evaluation_results/output_image.nii.gz')
-
-    
