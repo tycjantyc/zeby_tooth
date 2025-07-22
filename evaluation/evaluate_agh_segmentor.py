@@ -39,8 +39,8 @@ def evaluate_agh(model:nn.Module,
 
     patches, indices, padded_shape = get_patches(volume, model_input_shape, stride)
 
-    output = np.zeros((num_classes, *padded_shape)) 
-    counts = np.zeros_like(output)
+    output = np.zeros((num_classes, *padded_shape), dtype = np.float16) 
+    counts = np.zeros_like(output, dtype=np.uint8)
 
     for patch, (i, j, k) in tqdm(zip(patches, indices)):
         
@@ -60,7 +60,7 @@ def evaluate_agh(model:nn.Module,
         prediction = nn.Sigmoid()(prediction)
         prediction = prediction.squeeze().detach().cpu().numpy()  
         
-        output[:, x:x+h, y:y+w, z:z+d] += prediction
+        output[:, x:x+h, y:y+w, z:z+d] += prediction.astype(np.float16)
         counts[:, x:x+h, y:y+w, z:z+d] += 1
 
     # Avoid division by zero
