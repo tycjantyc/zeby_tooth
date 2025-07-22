@@ -52,7 +52,7 @@ def evaluate_agh(model:nn.Module,
         y = np.ones((1, *volume.shape), dtype = np.float32) * coords[1]
         z = np.ones((1, *volume.shape), dtype = np.float32) * coords[2]
 
-        patch = np.concatenate((patch, x, y, z), axis = 0)
+        patch = np.concatenate((patch[None, ...], x, y, z), axis = 0)
         
         input_patch = patch[np.newaxis, ...]  # Adjust to your model's input shape
         input_patch = tc.tensor(input_patch, dtype = tc.float32).cuda()
