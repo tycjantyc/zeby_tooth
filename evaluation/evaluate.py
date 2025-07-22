@@ -79,5 +79,5 @@ def evaluate(model:nn.Module,
     segmented_volume = np.argmax(segmented_volume, axis=0)
     print(segmented_volume.shape)
 
-    return segmented_volume
+    return segmented_volume.astype(np.uint8)
 
