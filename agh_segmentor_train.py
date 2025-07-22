@@ -7,7 +7,7 @@ from training.train_segmentor_agh import train_segmentor_agh
 from processing.utils import norm_factory
 import argparse
 
-def main(data_path = 'D:/ToothFairy3', 
+def main(data_path = 'D:/db1_v1.0', 
          batch_size = 1, 
          min_clamp = -1000, 
          max_clamp = 3000, 
@@ -56,7 +56,7 @@ def main(data_path = 'D:/ToothFairy3',
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--data_dir', type=str, required=False, default='D:/ToothFairy3')
+    arg_parser.add_argument('--data_dir', type=str, required=False, default='D:/db1_v1.0')
     arg_parser.add_argument('--num_epochs', type=int, required=False, default=10)
     arg_parser.add_argument('--learning_rate', type=float, required=False, default=1e-4)
     arg_parser.add_argument('--weight_decay', type=float, required=False, default=1e-6)
