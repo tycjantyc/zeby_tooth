@@ -9,7 +9,7 @@ from monai.losses import DiceFocalLoss, DiceLoss
 
 def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
-    CRITERION = DiceLoss(include_background=False, sigmoid=True)
+    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True)
 
     DEVICE = 'cuda:0'
 
