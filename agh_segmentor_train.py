@@ -39,12 +39,12 @@ def main(data_path = 'D:/ToothFairy3',
     dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
-    val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=0)
+    val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     inchannels = 4
 
-    model = build_class_segmentor_model(inchannels=inchannels, outchannels=32, depths=[16, 32, 64, 128, 192])
-    optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=33, depths=[16, 32, 64, 128, 192])
+    optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,

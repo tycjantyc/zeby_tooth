@@ -25,7 +25,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
     model = model.to(DEVICE)
 
     global_step = 0
-    # global_loss = 100
+    global_loss = 100
 
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
@@ -36,7 +36,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
-            clean_output = F.one_hot(label_big.long(), num_classes=32)  #32 classes
+            clean_output = F.one_hot(label_big.long(), num_classes=33)  #32 classes
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
 
             
@@ -75,7 +75,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
         with tc.no_grad():
             for step, (label_small, label_big) in enumerate(val_dataloader):
 
-                clean_output = F.one_hot(label_big.long(), num_classes=32)  #32 classes
+                clean_output = F.one_hot(label_big.long(), num_classes=33)  #32 classes
                 clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
 
                 
