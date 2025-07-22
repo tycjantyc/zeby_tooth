@@ -36,6 +36,10 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
+            if step == 0 and epoch == 0:
+                print(label_small.min(), label_small.max())
+                print(np.unique(label_big))
+
             clean_output = F.one_hot(label_big.long(), num_classes=33)  #32 classes
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
 

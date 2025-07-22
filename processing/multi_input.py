@@ -48,7 +48,7 @@ class MultiInputFactory():
         dim = len(self.channels) + 1
         output = np.zeros((dim, *volume.shape), dtype=np.float32)
         
-        output[0, ...] = norm(volume)
+        output[0, ...] = volume
 
         for idx, channel in enumerate(self.channels):
             output[idx+1, ...] = choose_filter(volume, channel)
