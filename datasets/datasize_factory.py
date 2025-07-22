@@ -25,10 +25,12 @@ class DataSize_Factory():
         for file in list_of_files:
             volume = load_itk(file)
             sh = volume.shape
-
+            print(sh)
             for i in range(3):
                 if sh[i] < self.max_size[i]:
                     self.max_size[i] = sh[i]
+
+        print(self.max_size)
 
         with open(self.file_path, "a") as f:
             f.write(f"{self.dataset_name} - {self.max_size}")
