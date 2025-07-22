@@ -21,7 +21,7 @@ def prepare_toothfairy(image: np.ndarray,
         assert image.shape == mask.shape
 
         if patchify:
-            image, mask = create_random_snippet(image, mask, input_size, coords=coords)
+            image, mask, coordinations = create_random_snippet(image, mask, input_size, coords=True)
 
         image = normalization_function(image)
 
@@ -32,4 +32,7 @@ def prepare_toothfairy(image: np.ndarray,
         multi_input = MultiInputFactory(channels)
         image = multi_input.create(image)
 
-        return image, mask
+        if coords:
+             return image, mask, coordinations
+        else:
+            return image, mask
