@@ -33,6 +33,6 @@ def prepare_toothfairy(image: np.ndarray,
         image = multi_input.create(image)
 
         if coords:
-             return image, mask, coordinations
+            return image, mask, coordinations
         else:
             return image, mask
