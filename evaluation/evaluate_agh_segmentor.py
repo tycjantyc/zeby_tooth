@@ -48,9 +48,9 @@ def evaluate_agh(model:nn.Module,
 
         coords = ((x+h/2)/volume.shape[0], (y+w/2)/volume.shape[1], (z+d/2)/volume.shape[2])
         
-        x = np.ones((1, *volume.shape), dtype = np.float32) * coords[0]
-        y = np.ones((1, *volume.shape), dtype = np.float32) * coords[1]
-        z = np.ones((1, *volume.shape), dtype = np.float32) * coords[2]
+        x = np.ones((1, *patch.shape), dtype = np.float32) * coords[0]
+        y = np.ones((1, *patch.shape), dtype = np.float32) * coords[1]
+        z = np.ones((1, *patch.shape), dtype = np.float32) * coords[2]
 
         patch = np.concatenate((patch[None, ...], x, y, z), axis = 0)
         
