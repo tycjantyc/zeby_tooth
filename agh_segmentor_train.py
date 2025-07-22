@@ -43,7 +43,7 @@ def main(data_path = 'D:/ToothFairy3',
 
     inchannels = 4
 
-    model = build_class_segmentor_model(in_channel=inchannels, n_classes=32, depths=[16, 32, 64, 128, 192])
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=32, depths=[16, 32, 64, 128, 192])
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
