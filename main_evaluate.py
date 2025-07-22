@@ -4,6 +4,7 @@ from evaluation.evaluate import evaluate
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 import numpy as np
 import nibabel as nib
+from processing.utils import norm_factory
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
@@ -23,13 +24,15 @@ if __name__ == "__main__":
     stride_shape = (args.stride, args.stride, args.stride)
     input_shape = (args.model_input, args.model_input, args.model_input)
 
+    norm_func = norm_factory(args.normalization)
+
     segmented_volume = evaluate(model = model, 
                                 file = args.file, 
                                 model_input_shape = input_shape,
                                 stride = stride_shape,
                                 num_classes = args.num_classes,  
                                 compression_function = args.compression,
-                                normalization_function = args.normalization)
+                                normalization_function = norm_func)
 
     affine = np.eye(4)
     nifti_img = nib.Nifti1Image(segmented_volume, affine)
