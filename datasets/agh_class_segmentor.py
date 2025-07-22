@@ -77,9 +77,9 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         image, mask, coords = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels, coords=True)
 
         #add positional layers
-        x = np.ones(mask.shape, dtype = np.float32) * coords[0]
-        y = np.ones(mask.shape, dtype = np.float32) * coords[1]
-        z = np.ones(mask.shape, dtype = np.float32) * coords[2]
+        x = np.ones((1, *mask.shape), dtype = np.float32) * coords[0]
+        y = np.ones((1, *mask.shape), dtype = np.float32) * coords[1]
+        z = np.ones((1, *mask.shape), dtype = np.float32) * coords[2]
 
         image = np.concatenate((image, x, y, z), axis = 0)
 
