@@ -20,10 +20,13 @@ if __name__ == "__main__":
     model.load_state_dict(load(args.model_weights, weights_only=True))
     model.eval()
 
+    stride_shape = (args.stride, args.stride, args.stride)
+    input_shape = (args.model_input, args.model_input, args.model_input)
+
     segmented_volume = evaluate(model = args.model, 
                                 file = args.file, 
-                                model_input_shape = args.input_shape,
-                                stride = args.stride,
+                                model_input_shape = input_shape,
+                                stride = stride_shape,
                                 num_classes = args.num_classes,  
                                 compression_function = args.compression,
                                 normalization_function = args.normalization)
