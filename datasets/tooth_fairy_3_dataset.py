@@ -75,7 +75,7 @@ class ToothFairy3_Dataset(Dataset):
 
         assert image.shape == mask.shape
 
-        image = self.normalization(image)
+        # image = self.normalization(image)
         image, mask = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels)
 
         return image, mask

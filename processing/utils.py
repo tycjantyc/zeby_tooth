@@ -89,7 +89,7 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2):
     return cropped_volume, cropped_mask
 
 
-def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[int, int, int]):
+def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[int, int, int], coords = False):
         h, w, d = image.shape
         h1, w1, d1 = input_size
 
@@ -107,7 +107,12 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
                 continue
 
             temp_image = image[h_new:h_new+h1, w_new:w_new+w1, d_new:d_new+d1]
-            return temp_image, temp_mask
+
+            if not coords:
+                return temp_image, temp_mask
+            
+            else:
+                return temp_image, temp_mask, ((h_new+h1/2)/h, (w_new+w1/2)/w, (d_new+d1/2)/d) 
             
 
         

@@ -157,6 +157,19 @@ def only_teeth_and_canal_classes(volume):
 
     return volume_new
 
+def only_canal_classes(volume):
+    """
+    Kompresja:
+    Klasa 0 - background ([0:10,[11:48] 49:110])
+    Klasa 1 - Kanały zębowe ([111:148])
+    """
+    volume_new = volume.copy()  
+
+    volume_new[(volume > -1) & (volume < 111)] = 0
+    volume_new[(volume > 110) & (volume < 149)] = 1
+
+    return volume_new
+
 def compression_factory(mode_name = 'big'):
 
     if mode_name == 'big':
@@ -170,6 +183,11 @@ def compression_factory(mode_name = 'big'):
     
     if mode_name == 'none':
         return fix_tooth_fairy_classes, 77
+    
+    if mode_name == 'canal':
+        return only_canal_classes, 1
+    
+
 
 
 

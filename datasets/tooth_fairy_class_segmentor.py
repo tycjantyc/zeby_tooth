@@ -56,7 +56,7 @@ class ToothFairy3_Class_Segmentor_Dataset(Dataset):
 
         mask = self.compression_function(mask_org)
 
-        image = self.normalization(image)
+        # image = self.normalization(image)
         image, mask = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels)
 
         return image, mask

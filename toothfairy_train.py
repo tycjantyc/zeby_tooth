@@ -66,7 +66,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--learning_rate', type=float, required=False, default=1e-4)
     arg_parser.add_argument('--weight_decay', type=float, required=False, default=1e-6)
     arg_parser.add_argument('--batch_size', type=int, required=False, default=1)
-    arg_parser.add_argument('--compression', type=str, required=False, default='medium_rare', choices=['big', 'medium_rare', 'medium', 'none'])
+    arg_parser.add_argument('--compression', type=str, required=False, default='medium_rare', choices=['big', 'medium_rare', 'medium', 'none', 'canal'])
     arg_parser.add_argument('--normalization', type=str, required=False, default='01', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=True)
