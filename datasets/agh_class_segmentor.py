@@ -83,6 +83,6 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         image = np.concatenate((image, x, y, z), axis = 0)
 
-        return image, mask, coords
+        return image, mask
     
 
