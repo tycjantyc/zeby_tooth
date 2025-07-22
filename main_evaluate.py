@@ -1,6 +1,6 @@
 import argparse
 from torch import load
-from evaluate import evaluate
+from evaluation.evaluate import evaluate
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 import numpy as np
 import nibabel as nib
