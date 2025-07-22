@@ -74,9 +74,9 @@ def evaluate(model:nn.Module,
     if return_binary:
         segmented_volume[segmented_volume < 0.5] = 0
         segmented_volume[segmented_volume > 0.5] = 1
-        
+
     print(segmented_volume.shape)   
-    segmented_volume = np.argmax(segmented_volume, dim=1)
+    segmented_volume = np.argmax(segmented_volume, axis=0)
     print(segmented_volume.shape)
 
     return segmented_volume
