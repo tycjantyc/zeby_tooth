@@ -1,7 +1,9 @@
 import argparse
 from torch import load
 from evaluation.evaluate import evaluate
+from evaluation.evaluate_agh_segmentor import evaluate_agh
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
+from models.class_segmentor_model import build_class_segmentor_model
 import numpy as np
 import nibabel as nib
 from processing.utils import norm_factory
@@ -15,9 +17,14 @@ if __name__ == "__main__":
     arg_parser.add_argument('--num_classes', type=int, required=False)
     arg_parser.add_argument('--model_input', type=int, required=False)
     arg_parser.add_argument('--stride', type=int, required=False)
+    arg_parser.add_argument('--model', type=str, choices=['hyspark', 'resunet3dse'])
     args = arg_parser.parse_args()
 
-    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=args.num_classes)
+    if args.model == 'hyspark':
+        model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=args.num_classes)
+    else:
+        model = build_class_segmentor_model(inchannels=4, outchannels=33, depths=[16, 32, 64, 128, 192])
+
     model.load_state_dict(load(args.model_weights, weights_only=True))
     model.eval()
 
@@ -25,14 +32,23 @@ if __name__ == "__main__":
     input_shape = (args.model_input, args.model_input, args.model_input)
 
     norm_func = norm_factory(args.normalization)
-
-    segmented_volume = evaluate(model = model, 
+    
+    if args.model == 'hyspark':
+        segmented_volume = evaluate(model = model, 
                                 file = args.file, 
                                 model_input_shape = input_shape,
                                 stride = stride_shape,
                                 num_classes = args.num_classes,  
                                 compression_function = args.compression,
                                 normalization_function = norm_func)
+    else:
+        segmented_volume = evaluate_agh(model = model, 
+                                file = args.file, 
+                                model_input_shape = input_shape,
+                                stride = stride_shape,
+                                num_classes = args.num_classes,  
+                                normalization_function = norm_func)
+
 
     affine = np.eye(4)
     nifti_img = nib.Nifti1Image(segmented_volume, affine)
