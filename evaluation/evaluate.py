@@ -32,7 +32,7 @@ def evaluate(model:nn.Module,
              channels:list = []):
     
     volume = load_itk(file)
-    volume, _ = prepare_toothfairy(volume, volume.copy(), remove_ct_rings=remove_ct_rings, input_size=volume.shape, compression_function=compression_function, normalization_function=normalization_function, augmentation=False, channels=channels, patchify=False)
+    volume, _ = prepare_toothfairy(volume, volume.copy(), remove_ct_rings=remove_ct_rings, input_size=volume.shape, normalization_function=normalization_function, augmentation=False, channels=channels, patchify=False)
     volume = volume[0]
 
     model = model.cuda()
