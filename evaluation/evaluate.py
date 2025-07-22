@@ -42,8 +42,8 @@ def evaluate(model:nn.Module,
 
     patches, indices, padded_shape = get_patches(volume, model_input_shape, stride)
 
-    output = np.zeros((num_classes, *padded_shape)) 
-    counts = np.zeros_like(output)
+    output = np.zeros((num_classes, *padded_shape), dtype = np.float16) 
+    counts = np.zeros_like(output, dtype=np.uint8)
 
     for patch, (i, j, k) in tqdm(zip(patches, indices)):
         
@@ -56,7 +56,7 @@ def evaluate(model:nn.Module,
         # Place back into volume (accounting for overlap)
         x, y, z = i * stride[0], j * stride[1], k * stride[2]
         
-        output[:, x:x+h, y:y+w, z:z+d] += prediction
+        output[:, x:x+h, y:y+w, z:z+d] += prediction.astype(np.float16)
         counts[:, x:x+h, y:y+w, z:z+d] += 1
 
     # Avoid division by zero

@@ -24,7 +24,7 @@ def evaluate_agh(model:nn.Module,
              file:str, 
              model_input_shape: tuple[int, int, int], 
              stride: tuple[int, int, int], 
-             num_classes:int = 3,  
+             num_classes:int = 33,  
              remove_ct_rings:bool = False, 
              normalization_function = norm_to_0_1, 
              channels:list = []):
