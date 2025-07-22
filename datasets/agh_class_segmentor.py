@@ -35,9 +35,9 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         self.path_labels = os.path.join(self.data_directory, 'db1_v1.0_nifti_teeth_masks_single_cls_weak')
         self.path_labels_final = os.path.join(self.data_directory, 'db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak')
        
-        paths_cbct = sorted(os.listdir(self.path_cbct), key=lambda x: int(x))    
-        files_labels = sorted(os.listdir(self.path_labels), key=lambda x: int(x))
-        files_labels_final = sorted(os.listdir(self.path_labels_final), key=lambda x: int(x))
+        paths_cbct = sorted(os.listdir(self.path_cbct), key=lambda x: int(x.split('.')[0]))    
+        files_labels = sorted(os.listdir(self.path_labels), key=lambda x: int(x.split('.')[0]))
+        files_labels_final = sorted(os.listdir(self.path_labels_final), key=lambda x: int(x.split('.')[0]))
 
         paths_cbct = paths_cbct[:len(files_labels)]
         
