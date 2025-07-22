@@ -12,8 +12,8 @@ if __name__ == "__main__":
     arg_parser.add_argument('--compression', type=str, required=False, default='medium_rare', choices=['big', 'medium_rare', 'medium', 'none'])
     arg_parser.add_argument('--normalization', type=str, required=False, default='01', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--num_classes', type=int, required=False)
-    arg_parser.add_argument('--model_input', required=False)
-    arg_parser.add_argument('--stride', required=False)
+    arg_parser.add_argument('--model_input', type=int, required=False)
+    arg_parser.add_argument('--stride', type=int, required=False)
     args = arg_parser.parse_args()
 
     model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=args.num_classes)
