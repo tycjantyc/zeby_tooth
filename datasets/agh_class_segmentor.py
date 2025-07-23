@@ -87,7 +87,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         
         if self.encode_coords:
             image = np.concatenate((image, x, y, z), axis = 0)
-            return image, mask
+            return image.astype(np.float32), mask
         
         else:
             return image, mask, coords
