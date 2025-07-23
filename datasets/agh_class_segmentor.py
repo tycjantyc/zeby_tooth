@@ -12,7 +12,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
                         input_size = (96, 96, 96), 
                         remove_ct_rings:bool = False, 
                         clamp: tuple[int, int] = None, 
-                        normalization = norm_to_0_1,
+                        normalization = lambda x:x,
                         augmentation = False,
                         channels = [], 
                         validation_split = 0.0, 
@@ -46,7 +46,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
             
             file_cbct = os.path.join(self.path_cbct, file_cbct, 'image.nii.gz')
             file_label = os.path.join(self.path_labels, file_label)
-            file_label_final = os.path.join(self.path_labels, file_label_final)    
+            file_label_final = os.path.join(self.path_labels_final, file_label_final)    
             self.lista.append((file_cbct, file_label, file_label_final))
 
         split_index = int(len(self.lista) * self.validation_split)
@@ -69,6 +69,8 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
+        #image = np.flip(image, axis=(0, 2))
+
         mask = load_itk(path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
