@@ -49,6 +49,8 @@ class AGH_Class_Segmentor_Dataset(Dataset):
             file_label_final = os.path.join(self.path_labels_final, file_label_final)    
             self.lista.append((file_cbct, file_label, file_label_final))
 
+        self.lista = self.lista[:2]
+
         split_index = int(len(self.lista) * self.validation_split)
         
         if validation_mode:
@@ -69,8 +71,6 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
-        #image = np.flip(image, axis=(0, 2))
-
         mask = load_itk(path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
