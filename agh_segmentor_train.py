@@ -35,8 +35,8 @@ def main(data_path = 'D:/db1_v1.0',
 
     norm_func = norm_factory(normalization)
 
-    dataset_train = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels)
-    dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels)
+    dataset_train = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=0.05, validation_mode=False)
+    dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels, validation_split=0.05, validation_mode=True)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
