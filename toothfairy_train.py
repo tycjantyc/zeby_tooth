@@ -19,6 +19,7 @@ def main(data_path = 'D:/ToothFairy3',
          weight_decay = 1e-6, 
          num_epochs = 10,
          lr_warmup_steps = 40,
+         inputsize = 96,
          freeze = True,        # for the pretrained encoder to be frozen
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
@@ -40,15 +41,15 @@ def main(data_path = 'D:/ToothFairy3',
     comp_func, num_classes = compression_factory(compression)
     norm_func = norm_factory(normalization)
 
-    dataset_train = ToothFairy3_Dataset(data_directory=data_path, input_size=(96, 96, 96), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=validation_split)
-    dataset_val = ToothFairy3_Dataset(data_directory=data_path, input_size=(96, 96, 96), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func, augmentation=False, channels=channels, validation_split=validation_split, validation_mode=True, num_samples=8)
+    dataset_train = ToothFairy3_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=validation_split)
+    dataset_val = ToothFairy3_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), remove_ct_rings=False, clamp = (min_clamp, max_clamp), compression_function = comp_func, normalization=norm_func, augmentation=False, channels=channels, validation_split=validation_split, validation_mode=True, num_samples=8)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=0, pin_memory=False, prefetch_factor=None)
 
     inchannels = 1 + len(channels)
 
-    model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=num_classes, img_size=96, freeze=freeze)
+    model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=num_classes, img_size=inputsize, freeze=freeze)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
@@ -66,6 +67,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--learning_rate', type=float, required=False, default=1e-4)
     arg_parser.add_argument('--weight_decay', type=float, required=False, default=1e-6)
     arg_parser.add_argument('--batch_size', type=int, required=False, default=1)
+    arg_parser.add_argument('--input_size', type=int, required=False, default=96)
     arg_parser.add_argument('--compression', type=str, required=False, default='medium_rare', choices=['big', 'medium_rare', 'medium', 'none', 'canal'])
     arg_parser.add_argument('--normalization', type=str, required=False, default='01', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
@@ -82,6 +84,7 @@ if __name__ == '__main__':
          learning_rate=args.learning_rate,
          weight_decay=args.weight_decay,
          batch_size=args.batch_size,
+         inputsize=args.input_size,
          compression=args.compression,
          normalization=args.normalization,
          channels=args.channels,

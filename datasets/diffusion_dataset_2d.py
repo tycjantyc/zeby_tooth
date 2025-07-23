@@ -19,12 +19,10 @@ class Diffusion_Dataset_2D(Dataset):
         for num in folders:
             path = os.path.join(data_directory, num)
             self.lista.append(path)
-
-                             
+                        
     def __len__(self):
 
         return len(self.lista)
-
 
     def __getitem__(self, index): 
 
