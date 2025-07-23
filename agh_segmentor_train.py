@@ -3,6 +3,7 @@ from torch.optim import AdamW, Adam
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from datasets.agh_class_segmentor import AGH_Class_Segmentor_Dataset
 from models.class_segmentor_model import build_class_segmentor_model
+from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 from training.train_segmentor_agh import train_segmentor_agh
 from processing.utils import norm_factory
 import argparse
@@ -16,7 +17,7 @@ def main(data_path = 'D:/db1_v1.0',
          learning_rate = 1e-3, 
          weight_decay = 1e-6, 
          num_epochs = 10,
-         lr_warmup_steps = 200,
+         lr_warmup_steps = 20,
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          num_workers = 0,
          pin_memory = False,
@@ -43,7 +44,8 @@ def main(data_path = 'D:/db1_v1.0',
 
     inchannels = 4
 
-    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, depths=[16, 32, 64, 128, 192])
+    #model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, depths=[16, 32, 64, 128, 192])
+    model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--learning_rate', type=float, required=False, default=1e-4)
     arg_parser.add_argument('--weight_decay', type=float, required=False, default=1e-6)
     arg_parser.add_argument('--batch_size', type=int, required=False, default=1)
-    arg_parser.add_argument('--normalization', type=str, required=False, default='01', choices=['standard', '01', 'none'])
+    arg_parser.add_argument('--normalization', type=str, required=False, default='none', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=True)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
