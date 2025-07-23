@@ -8,7 +8,7 @@ def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, f
     wPATH = "hyspark/ckpt/hybird_ct_pretrained_timm_style_mask75.pth"
 
     model = build_hybird(in_channel=1, n_classes=14, img_size=img_size)
-    model.load_state_dict(torch.load(wPATH, weights_only=True), strict = False)
+    #model.load_state_dict(torch.load(wPATH, weights_only=True), strict = False)
 
     if freeze:
         for param1, param2 in zip(model.mae.parameters(), model.embeddings.parameters()):
