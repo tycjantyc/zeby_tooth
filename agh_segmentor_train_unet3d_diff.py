@@ -46,8 +46,8 @@ def main(data_path = 'D:/db1_v1.0',
     model = UNet3DConditionModel(sample_size=96, 
                                  in_channels=1, 
                                  out_channels=34,
-                                 down_block_types = ("CrossAttnDownBlock3D", "CrossAttnDownBlock3D", "CrossAttnDownBlock3D", "DownBlock3D"),
-                                 up_block_types = ("UpBlock3D", "CrossAttnUpBlock3D", "CrossAttnUpBlock3D", "CrossAttnUpBlock3D"),
+                                 down_block_types = ("DownBlock3D", "DownBlock3D", "DownBlock3D", "DownBlock3D"),
+                                 up_block_types = ("UpBlock3D", "UpBlock3D", "UpBlock3D", "UpBlock3D"),
                                  block_out_channels = (64, 64, 128, 128))
     
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
