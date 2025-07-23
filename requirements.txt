@@ -15,3 +15,4 @@ graphviz
 torchinfo
 nibabel
 h5py
+diffusers

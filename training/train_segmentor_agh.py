@@ -10,7 +10,7 @@ from monai.losses import DiceFocalLoss, DiceLoss
 def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
     #wagi = [0.1] + [1] * 32
-    CRITERION = DiceFocalLoss(include_background=True, sigmoid=True)
+    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True)
 
     DEVICE = 'cuda:0'
 
@@ -41,10 +41,9 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
                 print(label_small.min(), label_small.max())
                 print(label_big.min(), label_big.max())
 
-            clean_output = F.one_hot(label_big.long(), num_classes=34)  #32 classes
+            clean_output = F.one_hot(label_big.long(), num_classes=2)  #32 classes
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
-
-            
+    
             clean_input = label_small.to(DEVICE)
             clean_output = clean_output.to(DEVICE)
 
@@ -80,7 +79,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
         with tc.no_grad():
             for step, (label_small, label_big) in enumerate(val_dataloader):
 
-                clean_output = F.one_hot(label_big.long(), num_classes=34)  #32 classes
+                clean_output = F.one_hot(label_big.long(), num_classes=2)  #32 classes
                 clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
                 
                 clean_input = label_small.to(DEVICE)

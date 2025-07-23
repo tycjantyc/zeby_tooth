@@ -17,7 +17,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
                         channels = [], 
                         validation_split = 0.0, 
                         validation_mode = False,
-                        test_samples = 1
+                        encode_coords = True
                     ):
         
         self.data_directory = data_directory
@@ -29,6 +29,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         self.channels = channels
         self.validation_split = validation_split
         self.validation_mode = validation_mode
+        self.encode_coords = encode_coords
 
         self.lista = []
 
@@ -49,7 +50,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
             file_label_final = os.path.join(self.path_labels_final, file_label_final)    
             self.lista.append((file_cbct, file_label, file_label_final))
 
-        self.lista = self.lista[:2]
+        self.lista = self.lista[:1]
 
         split_index = int(len(self.lista) * self.validation_split)
         
@@ -71,11 +72,9 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
-        mask = load_itk(path_label)
+        mask = load_itk(path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
-
-        print(image.shape)
 
         assert image.shape == mask.shape
 
@@ -85,9 +84,12 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         x = np.ones((1, *mask.shape), dtype = np.float32) * coords[0]
         y = np.ones((1, *mask.shape), dtype = np.float32) * coords[1]
         z = np.ones((1, *mask.shape), dtype = np.float32) * coords[2]
-
-        image = np.concatenate((image, x, y, z), axis = 0)
-
-        return image, mask
+        
+        if self.encode_coords:
+            image = np.concatenate((image, x, y, z), axis = 0)
+            return image, mask
+        
+        else:
+            return image, mask, coords
     
 

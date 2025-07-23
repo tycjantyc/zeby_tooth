@@ -13,7 +13,7 @@ def main(data_path = 'D:/db1_v1.0',
          min_clamp = -1000, 
          max_clamp = 3000, 
          normalization = '01', #'standard', '01', 'none'
-         augmentation = True, 
+         augmentation = False, 
          learning_rate = 1e-3, 
          weight_decay = 1e-6, 
          num_epochs = 10,
@@ -44,8 +44,8 @@ def main(data_path = 'D:/db1_v1.0',
 
     inchannels = 4
 
-    #model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, depths=[16, 32, 64, 128, 192])
-    model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=2, depths=[16, 32, 64, 128, 192])
+    #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=2, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--batch_size', type=int, required=False, default=1)
     arg_parser.add_argument('--normalization', type=str, required=False, default='none', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
-    arg_parser.add_argument('--augmentation', required=False, default=True)
+    arg_parser.add_argument('--augmentation', required=False, default=False)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)

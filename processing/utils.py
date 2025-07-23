@@ -112,7 +112,7 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
                 return temp_image, temp_mask
             
             else:
-                return temp_image, temp_mask, ((h_new+h1/2)/h, (w_new+w1/2)/w, (d_new+d1/2)/d) 
+                return temp_image, temp_mask, np.array([(h_new+h1/2)/h, (w_new+w1/2)/w, (d_new+d1/2)/d])
             
 
         
