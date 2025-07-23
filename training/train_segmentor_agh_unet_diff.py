@@ -23,6 +23,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
     )
 
     model = model.to(DEVICE)
+    print("Allocated:", round(tc.cuda.memory_allocated() / 1024**3, 2), "GB")
 
     global_step = 0
     global_loss = 100
@@ -44,7 +45,9 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
     
             clean_input = label_small.to(DEVICE)
+            print("Allocated:", round(tc.cuda.memory_allocated() / 1024**3, 2), "GB")
             clean_output = clean_output.to(DEVICE)
+            print("Allocated:", round(tc.cuda.memory_allocated() / 1024**3, 2), "GB")
             coords = coords.to(DEVICE)
             timestep = tc.LongTensor([0]*clean_input.shape[0]).to(DEVICE)
 
