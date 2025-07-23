@@ -43,7 +43,7 @@ def main(data_path = 'D:/db1_v1.0',
 
     inchannels = 4
 
-    model = build_class_segmentor_model(inchannels=inchannels, outchannels=33, depths=[16, 32, 64, 128, 192])
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, depths=[16, 32, 64, 128, 192])
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
