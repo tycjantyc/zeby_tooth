@@ -16,7 +16,8 @@ class AGH_Class_Segmentor_Dataset(Dataset):
                         augmentation = False,
                         channels = [], 
                         validation_split = 0.0, 
-                        validation_mode = False
+                        validation_mode = False,
+                        test_samples = 1
                     ):
         
         self.data_directory = data_directory
@@ -65,8 +66,6 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         paths = self.lista[index]
         path_cbct, path_label, path_label_final = paths
-
-        print(path_cbct, path_label, path_label_final)
 
         #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)

@@ -39,7 +39,7 @@ class AGH_Pulp_Dataset(Dataset):
         paths_cbct = sorted(os.listdir(self.path_cbct), key=lambda x: int(x))
         files_labels = sorted(os.listdir(self.path_labels), key=lambda x: int(x))
         
-        paths_cbct = paths_cbct[:len(files_labels)]
+        paths_cbct = paths_cbct[1:len(files_labels)+1]
 
         for file_cbct, file_label in zip(paths_cbct, files_labels):
             
