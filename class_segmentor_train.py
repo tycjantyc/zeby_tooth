@@ -36,6 +36,7 @@ def main(data_path = 'D:/ToothFairy3',
 
     norm_func = norm_factory(normalization)
 
+    print("Building datasets...")
     dataset_train = ToothFairy3_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=0.05, validation_mode=False)
     dataset_val = ToothFairy3_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels, validation_split=0.05, validation_mode=True)
     
@@ -45,6 +46,7 @@ def main(data_path = 'D:/ToothFairy3',
     inchannels = 4
 
     #model = build_class_segmentor_model(inchannels=inchannels, outchannels=33, depths=[16, 32, 64, 128, 192])
+    print("Initialize model...")
     model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=33, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
@@ -54,6 +56,7 @@ def main(data_path = 'D:/ToothFairy3',
         num_training_steps=(len(train_dataloader) * num_epochs),
     )
 
+    print("Start training...")
     train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
 
 if __name__ == '__main__':

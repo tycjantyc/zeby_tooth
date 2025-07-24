@@ -27,7 +27,8 @@ def train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr
 
     global_step = 0
     global_loss = 100
-    
+
+    print("Starting epochs...")
 
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
