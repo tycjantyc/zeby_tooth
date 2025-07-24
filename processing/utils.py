@@ -83,7 +83,7 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96):
     xmax = min(xmax + padding + 1, volume.shape[2])
 
     # Crop
-    if zmax - zmin < input:
+    if zmax - zmin < input or ymax-ymin < input or xmax-xmin < input:
         return volume[zmin:zmin+input, ymin:ymin+input, xmin:xmin+input], mask[zmin:zmin+input, ymin:ymin+input, xmin:xmin+input]
 
     cropped_volume = volume[zmin:zmax, ymin:ymax, xmin:xmax]
