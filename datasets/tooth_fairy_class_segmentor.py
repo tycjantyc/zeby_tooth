@@ -79,7 +79,7 @@ class ToothFairy3_Class_Segmentor_Dataset(Dataset):
         print(np.unique(mask))
         print(path_cbct)
 
-        image, mask = crop_to_mask(image, mask, padding=48)
+        image, mask = crop_to_mask(image, mask, padding=48, input = self.input_size)
 
         print(image.shape)
 
