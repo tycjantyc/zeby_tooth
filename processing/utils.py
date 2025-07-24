@@ -108,11 +108,13 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
 
             temp_image = image[h_new:h_new+h1, w_new:w_new+w1, d_new:d_new+d1]
 
+            coordianates = [[h_new/h, (h_new+h1)/h], [w_new/w, (w_new+h1)/w], [d_new/d, (d_new+d1)/d]]
+
             if not coords:
                 return temp_image, temp_mask
             
             else:
-                return temp_image, temp_mask, np.array([(h_new+h1/2)/h, (w_new+w1/2)/w, (d_new+d1/2)/d])
+                return temp_image, temp_mask, coordianates
             
 
         

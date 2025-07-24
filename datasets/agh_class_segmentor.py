@@ -80,13 +80,21 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         image, mask, coords = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels, coords=True)
 
+        zz, yy, xx = coords
+
+        z0, z1 = zz
+        y0, y1 = yy
+        x0, x1 = xx
+
         #add positional layers
-        x = np.ones((1, *mask.shape), dtype = np.float32) * coords[0]
-        y = np.ones((1, *mask.shape), dtype = np.float32) * coords[1]
-        z = np.ones((1, *mask.shape), dtype = np.float32) * coords[2]
-        
+        z = np.linspace(z0, z1, 96)
+        y = np.linspace(y0, y1, 96)
+        x = np.linspace(x0, x1, 96)
+
+        grid_z, grid_y, grid_x = np.meshgrid(z, y, x, indexing='ij')  
+          
         if self.encode_coords:
-            image = np.concatenate((image, x, y, z), axis = 0)
+            image = np.stack([image, grid_x, grid_y, grid_z], axis=0)
             return image.astype(np.float32), mask
         
         else:
