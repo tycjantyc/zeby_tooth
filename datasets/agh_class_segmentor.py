@@ -92,7 +92,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         grid_z, grid_y, grid_x = np.meshgrid(z, y, x, indexing='ij')  
           
         if self.encode_coords:
-            image = np.stack([image, grid_x, grid_y, grid_z], axis=0)
+            image = np.stack([image[0], grid_x, grid_y, grid_z], axis=0)
             return image.astype(np.float32), mask
         
         else:
