@@ -37,6 +37,7 @@ def train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr
         loss_full = 0
 
         #Training phase
+        print(f"Start epoch nr {epoch}")
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
             if (label_big < 0).any() or (label_big >= 33).any():
