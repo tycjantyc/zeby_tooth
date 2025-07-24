@@ -76,7 +76,7 @@ class ToothFairy3_Class_Segmentor_Dataset(Dataset):
         image = teeth_semantic(image)
         mask = teeth_instance(mask)
 
-        image, mask = crop_to_mask(image, mask, padding=5)
+        image, mask = crop_to_mask(image, mask, padding=15)
 
         assert image.shape == mask.shape
 
