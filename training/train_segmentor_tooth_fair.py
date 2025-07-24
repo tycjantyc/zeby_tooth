@@ -40,7 +40,7 @@ def train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr
         print(f"Start epoch nr {epoch}")
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
-            if (label_big < 0).any() or (label_big >= 33).any() or tc.unique(label_big) == 1:
+            if (label_big < 0).any() or (label_big >= 33).any():
                 print("Invalid label found:")
                 continue
 
@@ -86,7 +86,7 @@ def train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr
         with tc.no_grad():
             for step, (label_small, label_big) in enumerate(val_dataloader):
                 
-                if (label_big < 0).any() or (label_big >= 33).any() or tc.unique(label_big) == 1:
+                if (label_big < 0).any() or (label_big >= 33).any():
                     print("Invalid label found:")
                     continue
 
