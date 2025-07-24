@@ -74,9 +74,13 @@ class ToothFairy3_Class_Segmentor_Dataset(Dataset):
         mask = load_itk(path_label)
 
         image = teeth_semantic(image)
-        mask = teeth_instance(image)
+        mask = teeth_instance(mask)
+
+        print(image.max(), mask.max())
 
         image, mask = crop_to_mask(image, mask, padding=5)
+
+        print(image.shape)
 
         assert image.shape == mask.shape
 
