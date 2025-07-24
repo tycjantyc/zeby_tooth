@@ -50,8 +50,6 @@ class AGH_Class_Segmentor_Dataset(Dataset):
             file_label_final = os.path.join(self.path_labels_final, file_label_final)    
             self.lista.append((file_cbct, file_label, file_label_final))
 
-        self.lista = self.lista[:1]
-
         split_index = int(len(self.lista) * self.validation_split)
         
         if validation_mode:
@@ -71,7 +69,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         path_cbct, path_label, path_label_final = paths
 
         #image = load_itk(path_cbct, clamp = self.clamp)
-        image = load_itk(path_cbct)
+        image = load_itk(path_label)
         mask = load_itk(path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
