@@ -96,6 +96,8 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
         if h < h1 or w < w1 or d < d1:
             raise ValueError('Input size is too big!')
         
+        num = 0
+
         while True:
             h_new = np.random.randint(0, h-h1)
             w_new = np.random.randint(0, w-w1)
@@ -103,7 +105,8 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
 
             temp_mask = mask[h_new:h_new+h1, w_new:w_new+w1, d_new:d_new+d1]
 
-            if np.all(mask == 0):   #prevents from choosing meaningless masks
+            if np.all(mask == 0) and num < 20:   #prevents from choosing meaningless masks
+                num += 1
                 continue
 
             temp_image = image[h_new:h_new+h1, w_new:w_new+w1, d_new:d_new+d1]
