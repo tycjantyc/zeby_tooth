@@ -81,6 +81,10 @@ def train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_sch
         with tc.no_grad():
             for step, (image, label) in enumerate(val_dataloader):
 
+                if (label < 0).any() or (label >= num_classes).any():
+                    print("Invalid label found:")
+                    continue
+
                 if num_classes > 1:
                     clean_label = F.one_hot(label.long(), num_classes=num_classes)
                     clean_label = clean_label.permute(0, 4, 1, 2, 3).float()
