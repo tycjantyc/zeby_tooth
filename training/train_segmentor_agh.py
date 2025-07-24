@@ -34,7 +34,6 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
         progress_bar.set_description(f"Epoch {epoch}")
 
         loss_full = 0
-        loss_dice = 0
 
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):

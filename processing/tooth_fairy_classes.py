@@ -170,6 +170,37 @@ def only_canal_classes(volume):
 
     return volume_new
 
+def teeth_semantic(volume):
+    """
+    Kompresja:
+    Klasa 0 - background ([0:10, 49:110])
+    Klasa 1 - Zęby ([11:48], [111:148])
+    """
+    volume_new = volume.copy()  
+    volume_new[(volume > -1) & (volume < 11)] = 0
+    volume_new[(volume > 48) & (volume < 111)] = 0
+    
+    volume_new[(volume > 10) & (volume < 49)] = 1
+    volume_new[(volume > 110) & (volume < 149)] = 1
+
+    return volume_new
+
+def teeth_instance(volume):
+    """
+    Kompresja:
+    Klasa 0 - background ([0:10, 49:110])
+    Klasa 1 - Zęby ([11:48], [111:148])
+    """
+    volume_new = volume.copy()  
+    volume_new[(volume > -1) & (volume < 11)] = 0
+    volume_new[(volume > 48) & (volume < 111)] = 0
+    
+    for i in range(4):
+        for j in range(8):
+            volume_new[(volume == (11+10*i+j)) | (volume == (11+100+10*i+j))] = i*8+j+1
+    
+    return volume_new
+
 def compression_factory(mode_name = 'big'):
 
     if mode_name == 'big':
@@ -187,13 +218,8 @@ def compression_factory(mode_name = 'big'):
     if mode_name == 'canal':
         return only_canal_classes, 1
     
-
-
-
-
-
-
+    if mode_name == 'teeth_semantic':
+        return teeth_semantic, 2
     
-    
-
-
+    if mode_name == 'teeth_instance':
+        return teeth_instance, 33

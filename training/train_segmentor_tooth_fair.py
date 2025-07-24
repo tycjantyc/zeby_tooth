@@ -7,9 +7,10 @@ import torch.nn as nn
 import numpy as np
 from monai.losses import DiceFocalLoss, DiceLoss
 
-def train_class_segmentor(model, optimizer, train_dataloader, lr_scheduler, num_epochs, num_classes):
+def train_segmentor_fairy(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
-    CRITERION = DiceLoss(include_background=False, sigmoid=False)
+    #wagi = [0.1] + [1] * 32
+    CRITERION = DiceFocalLoss(include_background=True, sigmoid=False, softmax=True)
 
     DEVICE = 'cuda:0'
 
@@ -25,7 +26,8 @@ def train_class_segmentor(model, optimizer, train_dataloader, lr_scheduler, num_
     model = model.to(DEVICE)
 
     global_step = 0
-    # global_loss = 100
+    global_loss = 100
+    
 
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
@@ -36,18 +38,18 @@ def train_class_segmentor(model, optimizer, train_dataloader, lr_scheduler, num_
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
-            if (label_small < 0).any() or (label_small >= num_classes).any():
+            if (label_big < 0).any() or (label_big >= 33).any():
                 print("Invalid label found:")
                 continue
-            
-            clean_input = F.one_hot(label_small.long(), num_classes=num_classes)
-            clean_input = clean_input.permute(0, 4, 1, 2, 3).float()
 
-            clean_output = F.one_hot(label_big.long(), num_classes=77)  #77 classes
+            if step == 0 and epoch == 0:
+                print(label_small.min(), label_small.max())
+                print(label_big.min(), label_big.max())
+
+            clean_output = F.one_hot(label_big.long(), num_classes=33)  #32 classes
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
-
-            
-            clean_input = clean_input.to(DEVICE)
+    
+            clean_input = label_small.to(DEVICE)
             clean_output = clean_output.to(DEVICE)
 
             with accelerator.accumulate(model):
@@ -76,48 +78,46 @@ def train_class_segmentor(model, optimizer, train_dataloader, lr_scheduler, num_
         loss_full = loss_full/len(train_dataloader)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
 
-        # loss_val_full = 0
+        loss_val_full = 0
 
-        # #Validation phase
-        # with tc.no_grad():
-        #     for step, (image, label) in enumerate(val_dataloader):
-
-        #         clean_label = F.one_hot(label.long(), num_classes=num_classes)
-        #         clean_label = clean_label.permute(0, 4, 1, 2, 3).float()
-
+        #Validation phase
+        with tc.no_grad():
+            for step, (label_small, label_big) in enumerate(val_dataloader):
                 
+                if (label_big < 0).any() or (label_big >= 33).any():
+                    print("Invalid label found:")
+                    continue
 
+                clean_output = F.one_hot(label_big.long(), num_classes=33)  #32 classes
+                clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
+                
+                clean_input = label_small.to(DEVICE)
+                clean_output = clean_output.to(DEVICE)
 
-        #         clean_images = image
-
-        #         bs = clean_images.shape[0]
-        #         clean_images = clean_images.to(DEVICE)
-        #         clean_label = clean_label.to(DEVICE)
-
-        #         with accelerator.accumulate(model):
+                with accelerator.accumulate(model):
             
-        #             label_pred = model(clean_images)
+                    label_pred = model(clean_input)
 
-        #             # if tc.isnan(label_pred):
-        #             #     print("Model reutrned NaN! Abort!")
-        #             #     break
+                    # if tc.isnan(label_pred):
+                    #     print("Model reutrned NaN! Abort!")
+                    #     break
 
-        #             loss = CRITERION(label_pred, clean_label)
+                    loss = CRITERION(label_pred, clean_output)
                     
-        #             # if tc.isnan(loss.item()):
-        #             #     print("Loss reutrned NaN! Abort!")
-        #             #     break
+                    # if tc.isnan(loss.item()):
+                    #     print("Loss reutrned NaN! Abort!")
+                    #     break
 
-        #         loss_val_full += loss.item()
+                loss_val_full += loss.item()
 
-        # if len(val_dataloader) > 0:
-        #     loss_val_full = loss_val_full/len(val_dataloader)
-        #     print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
+        if len(val_dataloader) > 0:
+            loss_val_full = loss_val_full/len(val_dataloader)
+            print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
 
-        # if loss_val_full < global_loss:
-        #     tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_best.pt')
-        #     print(f"Weights saved! - Epoch {epoch}")
-        #     global_loss = loss_val_full
+        if loss_val_full < global_loss:
+            tc.save(model.state_dict(), f'models/weights/agh_segmentor_best.pt')
+            print(f"Weights saved! - Epoch {epoch}")
+            global_loss = loss_val_full
 
         tc.cuda.empty_cache()
         print("Cache emptied!")
