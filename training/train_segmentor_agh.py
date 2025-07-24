@@ -10,7 +10,7 @@ from monai.losses import DiceFocalLoss, DiceLoss
 def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
     #wagi = [0.1] + [1] * 32
-    CRITERION = DiceFocalLoss(include_background=False, sigmoid=False, softmax=False)
+    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True, softmax=False)
 
     DEVICE = 'cuda:0'
 
@@ -27,12 +27,14 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
 
     global_step = 0
     global_loss = 100
+    
 
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
         progress_bar.set_description(f"Epoch {epoch}")
 
         loss_full = 0
+        loss_dice = 0
 
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
