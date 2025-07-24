@@ -70,7 +70,9 @@ class AGH_Class_Segmentor_Dataset(Dataset):
 
         #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
-        mask = load_itk(path_label_final)
+        mask = load_itk(path_label)
+
+        print(path_label, path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
 
