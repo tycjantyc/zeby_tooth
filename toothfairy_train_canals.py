@@ -33,8 +33,8 @@ def main(data_path = 'data',
         
     print(f"Learning parameters: \n Data path: {data_path}\n Batch size: {batch_size}\n Augmentation: {augmentation}\n Learning rate: {learning_rate}\n Weight decay: {weight_decay}\n Number of epochs: {num_epochs}\n Channels: {channels}\n Number of workers: {num_workers}")
 
-    dataset_train = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=augmentation, channels=channels, validation_split=validation_split)
-    dataset_val = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=False, channels=channels, validation_split=validation_split, validation_mode=True)
+    dataset_train = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=augmentation, validation_split=validation_split)
+    dataset_val = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=False, validation_split=validation_split, validation_mode=True)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=0, pin_memory=False, prefetch_factor=None)
