@@ -3,18 +3,18 @@ from torch.optim import AdamW, Adam
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from datasets.tooth_fairy_3_canals_dataset import ToothFairy3_Canal_Dataset
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
-from training.train_toothfairy import train_tooth_fairy
+from training.train_toothfairy_canals import train_tooth_fairy_canals
 from processing.tooth_fairy_classes import compression_factory
 from processing.utils import norm_factory
 import argparse
 
-def main(data_path = 'D:/ToothFairy3', 
+def main(data_path = 'data', 
          batch_size = 1, 
          augmentation = True, 
          learning_rate = 1e-3, 
          weight_decay = 1e-6, 
          num_epochs = 10,
-         lr_warmup_steps = 40,
+         lr_warmup_steps = 200,
          inputsize = 96,
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
@@ -50,7 +50,7 @@ def main(data_path = 'D:/ToothFairy3',
         num_training_steps=(len(train_dataloader) * num_epochs),
     )
 
-    train_tooth_fairy(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs, num_classes=1)
+    train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
