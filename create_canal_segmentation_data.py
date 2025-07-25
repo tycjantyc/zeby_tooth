@@ -37,7 +37,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             temp_mask[mask == teeth_num] = 1
             temp_mask[mask == teeth_num + 32] = 2
             
-            image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=input_size)
+            image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=1)
             
             # mask_snipped[mask_snipped==1] = 0
             # mask_snipped[mask_snipped==2] = 1
