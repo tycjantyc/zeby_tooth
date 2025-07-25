@@ -56,7 +56,7 @@ class ToothFairy3_Canal_Dataset(Dataset):
 
         assert image.shape == mask.shape
         
-        if (image.shape < self.input_size[0]).all(): 
+        if np.all(np.array(image.shape) < self.input_size[0]): 
             image = embed_in_center(image, self.input_size[0])
         
         else:
