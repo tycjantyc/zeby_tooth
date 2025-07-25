@@ -140,6 +140,19 @@ def bigger_compress_tooth_fairy_classes(volume):
 
     return volume_new
 
+def teeth_canal_instance(volume):
+
+    volume_new = volume.copy()  
+    volume_new[(volume > -1) & (volume < 11)] = 0
+    volume_new[(volume > 48) & (volume < 111)] = 0
+    
+    for i in range(4):
+        for j in range(8):
+            volume_new[(volume == (11+10*i+j))] = i*8+j+1
+            volume_new[(volume == (11+100+10*i+j))] = 32+i*8+j+1
+    
+    return volume_new
+
 def only_teeth_and_canal_classes(volume):
     """
     Kompresja:
