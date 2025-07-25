@@ -55,13 +55,18 @@ class ToothFairy3_Canal_Dataset(Dataset):
         mask = np.load(path_label)
 
         assert image.shape == mask.shape
-
-        image = embed_in_center(image, self.input_size[0])
+        
+        if (image.shape < self.input_size[0]).all(): 
+            image = embed_in_center(image, self.input_size[0])
+        
+        else:
+            temp = np.zeros(self.input_size)
+            temp[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])] = image[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])]
 
         if self.augmentation:
             factory = AugmentationFactory()
             image, mask = factory.create(image, mask)
 
-        return image, mask
+        return image.astype(np.float32), mask.astype(np.float32)
     
 
