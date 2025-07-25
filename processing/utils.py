@@ -123,4 +123,27 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
                 return temp_image, temp_mask, coordianates
             
 
+import numpy as np
+
+def embed_in_center(small_volume: np.ndarray, big_volume_size: int) -> np.ndarray:
+    
+    if small_volume.ndim != 3:
+        raise ValueError("small_volume must be a 3D numpy array.")
+    
+    small_shape = small_volume.shape
+    if any(s > big_volume_size for s in small_shape):
+        raise ValueError("small_volume is larger than big_volume in at least one dimension.")
+
+    # Create the big volume filled with zeros
+    big_volume = np.zeros((big_volume_size, big_volume_size, big_volume_size), dtype=small_volume.dtype)
+
+    # Calculate the starting indices for centering
+    start = [(big_volume_size - s) // 2 for s in small_shape]
+    end = [start[i] + small_shape[i] for i in range(3)]
+
+    # Embed the small volume into the big one
+    big_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = small_volume
+
+    return big_volume
+
         

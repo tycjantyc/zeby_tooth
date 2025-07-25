@@ -1,8 +1,8 @@
 import os
 import numpy as np
-from processing.utils import load_itk, crop_to_mask
+from processing.utils import load_itk, crop_to_mask, norm_to_0_1
 from processing.tooth_fairy_classes import teeth_canal_instance
-
+import argparse
 
 def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64):
 
@@ -25,6 +25,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
         image = load_itk(file_img)
         mask = load_itk(file_lab)
 
+        image = norm_to_0_1(image)
         mask = teeth_canal_instance(mask)
 
         for teeth_num in np.unique(mask)[1:]:
@@ -38,8 +39,8 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             
             image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=input_size)
             
-            mask_snipped[mask_snipped==1] = 0
-            mask_snipped[mask_snipped==2] = 1
+            # mask_snipped[mask_snipped==1] = 0
+            # mask_snipped[mask_snipped==2] = 1
 
             print(mask_snipped.min(), mask_snipped.max())
             print(image_snipped.shape)
@@ -47,9 +48,15 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             if image_snipped.shape[0] > 110:
                 continue
 
-            np.save(file=f'data/snippets_img/{global_num}.npz', arr=image_snipped)
-            np.save(file=f'data/snippets_mask/{global_num}.npz', arr=mask_snipped)
+            np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
+            np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)
 
 
 if __name__ == "__main__":
-    create_canal_data(input_size=10)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--db_dir', type=str, required=False, default='D:/ToothFairy3')
+    arg_parser.add_argument('--padding', type=int, required=False, default=5)
+    arg_parser.add_argument('--input', type=float, required=False, default=96)
+    args = arg_parser.parse_args()
+
+    create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
