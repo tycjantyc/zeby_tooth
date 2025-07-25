@@ -23,6 +23,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
 
     for file_img, file_lab in tqdm(zip(paths_images, paths_labels)):
         
+        
         image = load_itk(file_img)
         mask = load_itk(file_lab)
 
@@ -33,6 +34,8 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             if teeth_num > 32:
                 continue
             
+            global_num+=1
+
             temp_mask = np.zeros(mask.shape)
             temp_mask[(mask != teeth_num) & (mask != teeth_num+32)] = 0
             temp_mask[mask == teeth_num] = 1
