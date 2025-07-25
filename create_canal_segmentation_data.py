@@ -3,6 +3,7 @@ import numpy as np
 from processing.utils import load_itk, crop_to_mask, norm_to_0_1
 from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
+from tqdm import tqdm
 
 def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64):
 
@@ -20,7 +21,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
 
     global_num = 0
 
-    for file_img, file_lab in zip(paths_images, paths_labels):
+    for file_img, file_lab in tqdm(zip(paths_images, paths_labels)):
         
         image = load_itk(file_img)
         mask = load_itk(file_lab)
