@@ -59,7 +59,7 @@ class ToothFairy3_Canal_Dataset(Dataset):
 
         assert image.shape == mask.shape
         
-        if image.shape[0] < self.input_size[0] and image.shape[1] < self.input_size[1]: 
+        if image.shape[0] < self.input_size[0] and image.shape[1] < self.input_size[1] and image.shape[2] < self.input_size[2]: 
             image = embed_in_center(image, self.input_size[0])
             mask = embed_in_center(mask, self.input_size[0])
         
