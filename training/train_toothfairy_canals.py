@@ -79,7 +79,7 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
             
                     label_pred = model(clean_images)
                     loss = CRITERION(label_pred, clean_label)
-                    print(f"Validation Dice Score: {CRITERION.dice(label_pred, clean_label)}")
+                    print(f"Validation Dice Score: {CRITERION.dice(label_pred, clean_label).item()}")
 
                 loss_val_full += loss.item()
 
