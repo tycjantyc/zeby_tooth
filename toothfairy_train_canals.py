@@ -3,6 +3,7 @@ from torch.optim import AdamW, Adam
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from datasets.tooth_fairy_3_canals_dataset import ToothFairy3_Canal_Dataset
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
+from models.class_segmentor_model import build_class_segmentor_model
 from training.train_toothfairy_canals import train_tooth_fairy_canals
 from processing.tooth_fairy_classes import compression_factory
 from processing.utils import norm_factory
@@ -16,6 +17,7 @@ def main(data_path = 'data',
          num_epochs = 10,
          lr_warmup_steps = 200,
          inputsize = 96,
+         model = 'hyspark',
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
          num_workers = 0,
@@ -41,8 +43,12 @@ def main(data_path = 'data',
 
     inchannels = 1 + len(channels)
 
-    model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=False)
-    optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    if model == 'hyspark':
+        model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=False)
+    elif model == 'resunet3dse':
+        model = build_class_segmentor_model(inchannels=inchannels, outchannels=1)
+    
+    optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,
@@ -62,6 +68,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--input_size', type=int, required=False, default=96)
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=True)
+    arg_parser.add_argument('--model', choices=['hyspark', 'resunet3dse'])
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
@@ -75,6 +82,7 @@ if __name__ == '__main__':
          batch_size=args.batch_size,
          inputsize=args.input_size,
          channels=args.channels,
+         model = args.model,
          augmentation=args.augmentation, 
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,

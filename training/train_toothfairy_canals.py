@@ -9,7 +9,7 @@ from monai.losses import DiceFocalLoss
 
 def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
-    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True, lambda_dice=1.0, lambda_focal=1.0)
+    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True, lambda_dice=1.0, lambda_focal=1.5, gamma=3)
 
     DEVICE = 'cuda:0'
 
@@ -66,7 +66,7 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
 
         loss_val_full = 0
-
+        list_dices = []
         #Validation phase
         with tc.no_grad():
             for step, (clean_images, clean_label) in enumerate(val_dataloader):
@@ -79,13 +79,16 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
             
                     label_pred = model(clean_images)
                     loss = CRITERION(label_pred, clean_label)
-                    print(f"Validation Dice Score: {CRITERION.dice(label_pred, clean_label).item()}")
+                    dice_score = CRITERION.dice(label_pred, clean_label).item()
+                    print(f"Validation Dice Score: {dice_score}")
+                    list_dices.append(dice_score)
 
                 loss_val_full += loss.item()
 
         if len(val_dataloader) > 0:
             loss_val_full = loss_val_full/len(val_dataloader)
-            print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
+            list_dices = np.array(list_dices)
+            print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}, Validation DICE: {1 - np.mean(list_dices)}')
 
         if loss_val_full < global_loss:
             tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_best.pt')
