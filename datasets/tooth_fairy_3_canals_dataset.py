@@ -55,9 +55,9 @@ class ToothFairy3_Canal_Dataset(Dataset):
         image = np.load(path_cbct)
         mask = np.load(path_label)
 
-        masked = image[mask==1]
+        masked = image[mask>0]
 
-        image[mask==1] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
+        image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
 
         mask[mask==1] == 0
         mask[mask==2] == 1
