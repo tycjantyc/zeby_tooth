@@ -5,7 +5,7 @@ import torch
 class AugmentationFactory():
     def __init__(self):
         self.transform = tio.Compose([
-                                        tio.RandomFlip(axes=(0, 1, 2), flip_probability=0.3)
+                                        tio.RandomFlip(axes=(0, 1, 2), flip_probability=0.5)
                                         # tio.RandomAffine(
                                         #     scales=(0.95, 1.05),
                                         #     degrees=5,

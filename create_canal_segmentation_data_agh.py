@@ -1,0 +1,66 @@
+import os
+import numpy as np
+from processing.utils import load_itk, crop_to_mask, norm_to_0_1
+from processing.tooth_fairy_classes import teeth_canal_instance
+import argparse
+from tqdm import tqdm
+
+def create_canal_data(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
+
+    path_images = os.path.join(data_dir, 'db1_v1.0_nifti')
+    path_helper = os.path.join(data_dir, 'db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak')
+    path_labels = os.path.join(data_dir, 'db1_v1.0_nifti_root_canal_masks_single_cls_ref')
+
+    paths_images = [os.path.join(path_images, i, 'image.nii.gz') for i in os.listdir(path_images)]
+    paths_helpers = [os.path.join(path_helper, i) for i in os.listdir(path_helper)]
+    paths_labels = [os.path.join(path_labels, i) for i in os.listdir(path_labels)]
+
+    if os.path.isdir('data'):
+        pass
+    else:
+        os.mkdir('data')
+
+    if os.path.isdir('data/snippets_img'):
+        pass
+    else:
+        os.mkdir('data/snippets_img')
+        os.mkdir('data/snippets_mask')
+
+    global_num = 0
+
+    for file_img, file_help, file_lab in tqdm(zip(paths_images, paths_helpers, paths_labels)):
+        
+        
+        image = load_itk(file_img)
+        helper = load_itk(file_help)
+        mask = load_itk(file_lab)
+        image = norm_to_0_1(image)
+
+        print(np.unique(helper))
+        print(mask.max())
+
+        for teeth_num in np.unique(helper)[1:]:
+            
+            global_num+=1
+
+            temp_mask = np.zeros(mask.shape)
+            temp_mask[helper == teeth_num] = 1 
+            temp_mask[(helper == teeth_num) & (mask == 1)] = 2
+
+            image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=1)
+
+            print(mask_snipped.min(), mask_snipped.max())
+            print(image_snipped.shape)
+
+            np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
+            np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--db_dir', type=str, required=False, default='D:/db1_v1.0')
+    arg_parser.add_argument('--padding', type=int, required=False, default=5)
+    arg_parser.add_argument('--input', type=float, required=False, default=96)
+    args = arg_parser.parse_args()
+
+    create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)

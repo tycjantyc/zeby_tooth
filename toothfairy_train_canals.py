@@ -8,6 +8,8 @@ from training.train_toothfairy_canals import train_tooth_fairy_canals
 from processing.tooth_fairy_classes import compression_factory
 from processing.utils import norm_factory
 import argparse
+from torch import load
+import os
 
 def main(data_path = 'data', 
          batch_size = 1, 
@@ -20,6 +22,7 @@ def main(data_path = 'data',
          model = 'hyspark',
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
+         weights_file = 'models/weights/tooth_fairy_3d_best.pt',
          num_workers = 0,
          pin_memory = False,
          prefetch_factor = None): 
@@ -48,6 +51,10 @@ def main(data_path = 'data',
     elif model == 'resunet3dse':
         model = build_class_segmentor_model(inchannels=inchannels, outchannels=1)
     
+    if os.path.isfile(weights_file):
+        model.load_state_dict(load(weights_file, weights_only=True))
+        print('Weights loaded!')
+
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(

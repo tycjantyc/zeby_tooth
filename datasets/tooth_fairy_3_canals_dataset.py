@@ -54,6 +54,10 @@ class ToothFairy3_Canal_Dataset(Dataset):
         image = np.load(path_cbct)
         mask = np.load(path_label)
 
+        masked = image[mask==1]
+
+        image[mask==1] = (masked - masked.min())/(masked.max() - masked.min())
+
         mask[mask==1] == 0
         mask[mask==2] == 1
 
@@ -70,6 +74,7 @@ class ToothFairy3_Canal_Dataset(Dataset):
             temp_mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])] = mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])]
             image = temp
             mask = temp_mask
+
 
         if self.augmentation:
             factory = AugmentationFactory()
