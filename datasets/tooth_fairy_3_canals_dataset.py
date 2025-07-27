@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from processing.utils import embed_in_center
 from processing.data_augmentation import *
+import SimpleITK as sitk
 
 class ToothFairy3_Canal_Dataset(Dataset):
     
@@ -56,10 +57,16 @@ class ToothFairy3_Canal_Dataset(Dataset):
 
         masked = image[mask==1]
 
-        image[mask==1] = (masked - masked.min())/(masked.max() - masked.min())
+        image[mask==1] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
 
         mask[mask==1] == 0
         mask[mask==2] == 1
+
+        # new = image.copy()
+        # new = sitk.GetImageFromArray(new)
+
+        # equalized = sitk.AdaptiveHistogramEqualization(image, alpha=1.0, beta=0.0, radius = 5)
+        # new = sitk.GetArrayFromImage(equalized)
 
         assert image.shape == mask.shape
         
