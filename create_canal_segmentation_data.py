@@ -23,11 +23,8 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
 
     for file_img, file_lab in tqdm(zip(paths_images, paths_labels)):
         
-        
         image = load_itk(file_img)
         mask = load_itk(file_lab)
-
-        image = norm_to_0_1(image)
         mask = teeth_canal_instance(mask)
 
         for teeth_num in np.unique(mask)[1:]:
@@ -42,15 +39,9 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             temp_mask[mask == teeth_num + 32] = 2
             
             image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=1)
-            
-            # mask_snipped[mask_snipped==1] = 0
-            # mask_snipped[mask_snipped==2] = 1
 
             print(mask_snipped.min(), mask_snipped.max())
             print(image_snipped.shape)
-            
-            if image_snipped.shape[0] > 110:
-                continue
 
             np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
             np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)

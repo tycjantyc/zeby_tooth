@@ -55,12 +55,17 @@ class ToothFairy3_Canal_Dataset(Dataset):
         image = np.load(path_cbct)
         mask = np.load(path_label)
 
+        mask = mask.astype(np.uint8)
+
         masked = image[mask>0]
 
-        image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
+        image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
+        image[mask<1] = 0 #zalewanie wszystkiego co nie jest kanałem
 
-        mask[mask==1] == 0
-        mask[mask==2] == 1
+        mask[mask<2] = 0
+        mask[mask>1] = 1
+
+        print(mask.max())
 
         # new = image.copy()
         # new = sitk.GetImageFromArray(new)
@@ -81,7 +86,6 @@ class ToothFairy3_Canal_Dataset(Dataset):
             temp_mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])] = mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])]
             image = temp
             mask = temp_mask
-
 
         if self.augmentation:
             factory = AugmentationFactory()

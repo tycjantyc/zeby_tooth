@@ -5,15 +5,18 @@ from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
 from tqdm import tqdm
 
-def create_canal_data(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
+def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
 
     path_images = os.path.join(data_dir, 'db1_v1.0_nifti')
     path_helper = os.path.join(data_dir, 'db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak')
     path_labels = os.path.join(data_dir, 'db1_v1.0_nifti_root_canal_masks_single_cls_ref')
 
-    paths_images = [os.path.join(path_images, i, 'image.nii.gz') for i in os.listdir(path_images)]
-    paths_helpers = [os.path.join(path_helper, i) for i in os.listdir(path_helper)]
-    paths_labels = [os.path.join(path_labels, i) for i in os.listdir(path_labels)]
+    paths_images = [os.path.join(path_images, i, 'image.nii.gz') for i in sorted(os.listdir(path_images), key=lambda x: int(x))]
+    paths_helpers = [os.path.join(path_helper, i) for i in sorted(os.listdir(path_helper), key=lambda x: int(x.split('.')[0]))]
+    paths_labels = [os.path.join(path_labels, i) for i in sorted(os.listdir(path_labels), key=lambda x: int(x.split('.')[0]))]
+
+    paths_images = paths_images[1: len(path_labels)+1]
+    paths_helpers = paths_helpers[: len(path_labels)]
 
     if os.path.isdir('data'):
         pass
@@ -34,7 +37,8 @@ def create_canal_data(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
         image = load_itk(file_img)
         helper = load_itk(file_help)
         mask = load_itk(file_lab)
-        image = norm_to_0_1(image)
+
+        print(file_help, file_lab)
 
         print(np.unique(helper))
         print(mask.max())
@@ -44,9 +48,12 @@ def create_canal_data(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
             global_num+=1
 
             temp_mask = np.zeros(mask.shape)
+            print(helper.shape)
+            print(temp_mask.shape)
+            temp_mask[helper != teeth_num] = 0
             temp_mask[helper == teeth_num] = 1 
             temp_mask[(helper == teeth_num) & (mask == 1)] = 2
-
+            #norm_to_0_1(image, min = int(image[helper == teeth_num].min()), max = int(image[helper == teeth_num].max()))
             image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=1)
 
             print(mask_snipped.min(), mask_snipped.max())
@@ -63,4 +70,4 @@ if __name__ == "__main__":
     arg_parser.add_argument('--input', type=float, required=False, default=96)
     args = arg_parser.parse_args()
 
-    create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
+    create_canal_data_agh(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
