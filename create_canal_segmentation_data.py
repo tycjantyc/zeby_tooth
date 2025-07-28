@@ -3,6 +3,7 @@ import numpy as np
 from processing.utils import load_itk, crop_to_mask, norm_to_0_1
 from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
+from create_canal_segmentation_data_agh import create_canal_data_agh
 from tqdm import tqdm
 
 def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64):
@@ -59,4 +60,9 @@ if __name__ == "__main__":
     arg_parser.add_argument('--input', type=float, required=False, default=96)
     args = arg_parser.parse_args()
 
-    create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
+    if args.db_dir.endswith('ToothFairy3_v1.0') or args.db_dir.endswith('ToothFairy3'):
+        create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
+    else:
+        create_canal_data_agh(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
+
+    
