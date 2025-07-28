@@ -7,9 +7,9 @@ import torch.nn as nn
 import numpy as np
 from monai.losses import DiceFocalLoss
 
-def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
+def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs, lambda_dice = 1.0, lambda_focal = 1.0, alpha = 0.99):
 
-    CRITERION = DiceFocalLoss(include_background=False, sigmoid=True, lambda_dice=1.0, lambda_focal=1.5, gamma=3)
+    CRITERION = DiceFocalLoss(include_background=True, sigmoid=True, lambda_dice=lambda_dice, lambda_focal=lambda_focal, gamma=2, alpha = alpha)
 
     DEVICE = 'cuda:0'
 

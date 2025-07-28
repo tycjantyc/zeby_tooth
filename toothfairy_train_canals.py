@@ -23,6 +23,9 @@ def main(data_path = 'data',
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
          weights_file = 'models/weights/tooth_fairy_3d_best.pt',
+         lambda_dice = 1,
+         lambda_focal = 1,
+         alpha_focal = 0.9,
          num_workers = 0,
          pin_memory = False,
          prefetch_factor = None): 
@@ -63,7 +66,7 @@ def main(data_path = 'data',
         num_training_steps=(len(train_dataloader) * num_epochs),
     )
 
-    train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
+    train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs, lambda_dice, lambda_focal, alpha_focal)
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
@@ -76,6 +79,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=True)
     arg_parser.add_argument('--model', choices=['hyspark', 'resunet3dse'])
+    arg_parser.add_argument('--lambda_dice', type=float, required=False, default=1.0)
+    arg_parser.add_argument('--lambda_focal', type=float, required=False, default=1.0)
+    arg_parser.add_argument('--alpha', type=float, required=False, default=0.99)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
@@ -91,6 +97,9 @@ if __name__ == '__main__':
          channels=args.channels,
          model = args.model,
          augmentation=args.augmentation, 
+         lambda_dice=args.lambda_dice,
+         lambda_focal=args.lambda_focal,
+         alpha_focal=args.alpha,
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,
          prefetch_factor=args.prefetch_factor
