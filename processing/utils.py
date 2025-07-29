@@ -63,7 +63,7 @@ def crop(image: np.ndarray, new_dims: list[int, int, int]):
     return image[x1:y1, x2:y2, x3:y3]
 
 
-def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, coords = False):
+def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, coordss = False):
     # Find bounding box of non-zero mask
     coords = np.array(np.nonzero(mask))
 
@@ -89,7 +89,7 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, c
     cropped_volume = volume[zmin:zmax, ymin:ymax, xmin:xmax]
     cropped_mask = mask[zmin:zmax, ymin:ymax, xmin:xmax]
 
-    if coords:
+    if coordss:
         return cropped_volume, cropped_mask, (zmin, zmax, ymin, ymax, xmin, xmax)
     else:
         return cropped_volume, cropped_mask
