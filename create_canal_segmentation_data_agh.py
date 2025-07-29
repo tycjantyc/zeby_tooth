@@ -59,6 +59,18 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
             print(mask_snipped.min(), mask_snipped.max())
             print(image_snipped.shape)
 
+            if image_snipped.shape[0] > 96:
+
+                z_half = image_snipped.shape[0]//2
+
+                np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped[:z_half])
+                np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped[:z_half])
+
+                global_num += 1
+
+                np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped[z_half:])
+                np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped[z_half:])
+                
             np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
             np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)
 

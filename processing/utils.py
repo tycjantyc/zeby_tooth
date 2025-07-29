@@ -63,7 +63,7 @@ def crop(image: np.ndarray, new_dims: list[int, int, int]):
     return image[x1:y1, x2:y2, x3:y3]
 
 
-def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96):
+def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, coords = False):
     # Find bounding box of non-zero mask
     coords = np.array(np.nonzero(mask))
 
@@ -89,7 +89,10 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96):
     cropped_volume = volume[zmin:zmax, ymin:ymax, xmin:xmax]
     cropped_mask = mask[zmin:zmax, ymin:ymax, xmin:xmax]
 
-    return cropped_volume, cropped_mask
+    if coords:
+        return cropped_volume, cropped_mask, (zmin, zmax, ymin, ymax, xmin, xmax)
+    else:
+        return cropped_volume, cropped_mask
 
 
 def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[int, int, int], coords = False):
@@ -125,7 +128,7 @@ def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[
 
 import numpy as np
 
-def embed_in_center(small_volume: np.ndarray, big_volume_size: int) -> np.ndarray:
+def embed_in_center(small_volume: np.ndarray, big_volume_size: int, coords:bool = False) -> np.ndarray:
     
     if small_volume.ndim != 3:
         raise ValueError("small_volume must be a 3D numpy array.")
@@ -144,6 +147,9 @@ def embed_in_center(small_volume: np.ndarray, big_volume_size: int) -> np.ndarra
     # Embed the small volume into the big one
     big_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = small_volume
 
-    return big_volume
+    if coords:
+        return big_volume, (start, end)
+    else:
+        return big_volume
 
         
