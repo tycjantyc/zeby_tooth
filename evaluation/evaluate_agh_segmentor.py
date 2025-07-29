@@ -29,7 +29,11 @@ def evaluate_agh(model:nn.Module,
              normalization_function = norm_to_0_1, 
              channels:list = []):
     
-    volume = load_itk(file)
+    if file.endswith('nii.gz'):
+        volume = load_itk(file)
+    elif file.endswith('.npy'):
+        volume = np.load(file)
+        
     volume, _ = prepare_toothfairy(volume, volume.copy(), remove_ct_rings=remove_ct_rings, input_size=volume.shape, normalization_function=normalization_function, augmentation=False, channels=channels, patchify=False, coords=False)
     volume = volume[0]
 

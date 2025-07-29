@@ -46,6 +46,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
                 print(label_small.min(), label_small.max())
                 print(label_big.min(), label_big.max())
 
+
             clean_output = F.one_hot(label_big.long(), num_classes=34)  #32 classes
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
     

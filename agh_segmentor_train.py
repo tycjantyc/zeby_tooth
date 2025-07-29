@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader
 from torch.optim import AdamW, Adam
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from datasets.agh_class_segmentor import AGH_Class_Segmentor_Dataset
+from datasets.agh_resize_classes import AGH_Resize_Classes
 from models.class_segmentor_model import build_class_segmentor_model
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 from training.train_segmentor_agh import train_segmentor_agh
@@ -36,13 +37,16 @@ def main(data_path = 'D:/db1_v1.0',
 
     norm_func = norm_factory(normalization)
 
-    dataset_train = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=0.05, validation_mode=False)
-    dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels, validation_split=0.05, validation_mode=True)
+    # dataset_train = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=0.05, validation_mode=False)
+    # dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels, validation_split=0.05, validation_mode=True)
+    
+    dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation, validation_split=0.05, validation_mode=False)
+    dataset_val = AGH_Resize_Classes(data_directory=data_path, augmentation=False, validation_split=0.05, validation_mode=True)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    inchannels = 4
+    inchannels = 1
 
     model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, depths=[16, 32, 64, 128, 192])
     #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=2, freeze=False)
