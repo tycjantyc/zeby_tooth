@@ -33,7 +33,8 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
 
     for file_img, file_help, file_lab in tqdm(zip(paths_images, paths_helpers, paths_labels)):
         
-        
+        number_image = int(file_help.split('/')[-1].split('.')[0])
+
         image = load_itk(file_img)
         helper = load_itk(file_help)
         mask = load_itk(file_lab)
@@ -63,17 +64,17 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
 
                 z_half = image_snipped.shape[0]//2
 
-                np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped[:z_half])
-                np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped[:z_half])
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_1.npy', arr=image_snipped[:z_half])
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_1.npy', arr=mask_snipped[:z_half])
 
                 global_num += 1
 
-                np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped[z_half:])
-                np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped[z_half:])
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_2.npy', arr=image_snipped[z_half:])
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_2.npy', arr=mask_snipped[z_half:])
             
             else:
-                np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
-                np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}.npy', arr=image_snipped)
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}.npy', arr=mask_snipped)
 
 
 if __name__ == "__main__":
