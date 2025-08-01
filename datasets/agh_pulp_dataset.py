@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from processing.utils import load_itk, norm_to_0_1, crop_to_mask
 from processing.tooth_fairy_classes import fix_tooth_fairy_classes
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
-
+from datasets.init import init_agh, validation_spliter
 
 class AGH_Pulp_Dataset(Dataset):
     
@@ -31,30 +31,9 @@ class AGH_Pulp_Dataset(Dataset):
         self.validation_split = validation_split
         self.validation_mode = validation_mode
 
-        self.lista = []
-
-        self.path_cbct = os.path.join(self.data_directory, 'db1_v1.0_nifti')
-        self.path_labels = os.path.join(self.data_directory, 'db1_v1.0_nifti_root_canal_masks_single_cls_ref')
-       
-        paths_cbct = sorted(os.listdir(self.path_cbct), key=lambda x: int(x))
-        files_labels = sorted(os.listdir(self.path_labels), key=lambda x: int(x))
-        
-        paths_cbct = paths_cbct[1:len(files_labels)+1]
-
-        for file_cbct, file_label in zip(paths_cbct, files_labels):
-            
-            file_cbct = os.path.join(self.path_cbct, file_cbct, 'image.nii.gz')
-            file_label = os.path.join(self.path_labels, file_label)
-            
-            self.lista.append((file_cbct, file_label))
-
-        split_index = int(len(self.lista) * self.validation_split)
-        
-        if validation_mode:
-            self.lista = self.lista[:split_index]
-        else:
-            self.lista = self.lista[split_index:]
-             
+        self.lista = init_agh(self.data_directory)
+        self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
+                       
                     
     def __len__(self):
 
@@ -64,7 +43,7 @@ class AGH_Pulp_Dataset(Dataset):
     def __getitem__(self, index): 
 
         paths = self.lista[index]
-        path_cbct, path_label = paths
+        path_cbct, path_helper, path_label = paths
 
         image = load_itk(path_cbct, clamp = self.clamp)
         mask = load_itk(path_label)
@@ -73,7 +52,6 @@ class AGH_Pulp_Dataset(Dataset):
 
         assert image.shape == mask.shape
 
-        # image = self.normalization(image)
         image, mask = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels)
 
         return image, mask

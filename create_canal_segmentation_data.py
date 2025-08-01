@@ -5,6 +5,7 @@ from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
 from create_canal_segmentation_data_agh import create_canal_data_agh
 from tqdm import tqdm
+from monai.transforms import Spacing
 
 def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64):
 
@@ -27,8 +28,10 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
 
     global_num = 0
 
-    for file_img, file_lab in tqdm(zip(paths_images, paths_labels)):
+    for number_image, (file_img, file_lab) in tqdm(enumerate(zip(paths_images, paths_labels))):
         
+        number_image += 1
+
         image = load_itk(file_img)
         mask = load_itk(file_lab)
         mask = teeth_canal_instance(mask)
@@ -49,8 +52,26 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             print(mask_snipped.min(), mask_snipped.max())
             print(image_snipped.shape)
 
-            np.save(file=f'data/snippets_img/{global_num}.npy', arr=image_snipped)
-            np.save(file=f'data/snippets_mask/{global_num}.npy', arr=mask_snipped)
+            rescale = Spacing(pixdim=(2/3, 2/3, 2/3), mode = 'bilinear')
+
+            image_snipped = rescale(image_snipped)
+            mask_snipped = rescale(mask_snipped)
+
+            if image_snipped.shape[0] > 96:
+
+                z_half = image_snipped.shape[0]//2
+
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_1.npy', arr=image_snipped[:z_half])
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_1.npy', arr=mask_snipped[:z_half])
+
+                global_num += 1
+
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_2.npy', arr=image_snipped[z_half:])
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_2.npy', arr=mask_snipped[z_half:])
+            
+            else:
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}.npy', arr=image_snipped)
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}.npy', arr=mask_snipped)
 
 
 if __name__ == "__main__":

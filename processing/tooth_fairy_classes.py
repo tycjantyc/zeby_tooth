@@ -232,7 +232,7 @@ def compression_factory(mode_name = 'big'):
         return only_canal_classes, 1
     
     if mode_name == 'teeth_semantic':
-        return teeth_semantic, 2
+        return teeth_semantic, 1
     
     if mode_name == 'teeth_instance':
         return teeth_instance, 33

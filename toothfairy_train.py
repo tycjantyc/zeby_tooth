@@ -36,7 +36,18 @@ def main(data_path = 'D:/ToothFairy3',
     if prefetch_factor == 0:
         prefetch_factor = None
         
-    print(f"Learning parameters: \n Data path: {data_path}\n Batch size: {batch_size}\n Compression: {compression}\n Normalization: {normalization}\n Augmentation: {augmentation}\n Learning rate: {learning_rate}\n Weight decay: {weight_decay}\n Number of epochs: {num_epochs}\n Freeze pretrainied layers: {freeze}\n Channels: {channels}\n Number of workers: {num_workers}")
+    print(f"""Learning parameters: \n 
+          Data path: {data_path}\n 
+          Batch size: {batch_size}\n 
+          Compression: {compression}\n 
+          Normalization: {normalization}\n 
+          Augmentation: {augmentation}\n 
+          Learning rate: {learning_rate}\n 
+          Weight decay: {weight_decay}\n 
+          Number of epochs: {num_epochs}\n 
+          Freeze pretrainied layers: {freeze}\n 
+          Channels: {channels}\n 
+          Number of workers: {num_workers}""")
 
     comp_func, num_classes = compression_factory(compression)
     norm_func = norm_factory(normalization)

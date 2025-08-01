@@ -50,13 +50,9 @@ def main(data_path = 'data',
     inchannels = 1 + len(channels)
 
     if model == 'hyspark':
-        model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=False)
+        model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=False, weight_path=weights_file)
     elif model == 'resunet3dse':
-        model = build_class_segmentor_model(inchannels=inchannels, outchannels=1)
-    
-    if os.path.isfile(weights_file):
-        model.load_state_dict(load(weights_file, weights_only=True))
-        print('Weights loaded!')
+        model = build_class_segmentor_model(inchannels=inchannels, outchannels=1, weight_path=weights_file)
 
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 

@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from processing.utils import load_itk, norm_to_0_1, crop_to_mask
 from processing.tooth_fairy_classes import fix_tooth_fairy_classes
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
-
+from datasets.init import init_tooth_fairy, validation_spliter
 
 class ToothFairy3_Dataset(Dataset):
     
@@ -33,28 +33,9 @@ class ToothFairy3_Dataset(Dataset):
         self.validation_split = validation_split
         self.validation_mode = validation_mode
 
-        self.lista = []
-
-        self.path_cbct = os.path.join(self.data_directory, 'imagesTr')
-        self.path_labels = os.path.join(self.data_directory, 'labelsTr')
-       
-        files_cbct = sorted(os.listdir(self.path_cbct))
-        files_labels = sorted(os.listdir(self.path_labels))
-         
-        for file_cbct, file_label in zip(files_cbct, files_labels):
-            
-            file_cbct = os.path.join(self.path_cbct, file_cbct)
-            file_label = os.path.join(self.path_labels, file_label)
-            for i in range(self.num_samples):
-                self.lista.append((file_cbct, file_label))
-
-        split_index = int(len(self.lista) * self.validation_split)
-        
-        if validation_mode:
-            self.lista = self.lista[:split_index]
-        else:
-            self.lista = self.lista[split_index:]
-             
+        self.lista = init_tooth_fairy(self.data_directory)
+        self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
+ 
                     
     def __len__(self):
 
@@ -75,7 +56,6 @@ class ToothFairy3_Dataset(Dataset):
 
         assert image.shape == mask.shape
 
-        # image = self.normalization(image)
         image, mask = prepare_toothfairy(image, mask, self.remove_ct_rings, self.input_size, self.normalization, self.augmentation, self.channels)
 
         return image, mask

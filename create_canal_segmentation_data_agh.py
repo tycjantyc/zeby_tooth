@@ -5,6 +5,7 @@ from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
 from tqdm import tqdm
 
+
 def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64):
 
     path_images = os.path.join(data_dir, 'db1_v1.0_nifti')
@@ -54,7 +55,6 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
             temp_mask[helper != teeth_num] = 0
             temp_mask[helper == teeth_num] = 1 
             temp_mask[(helper == teeth_num) & (mask == 1)] = 2
-            #norm_to_0_1(image, min = int(image[helper == teeth_num].min()), max = int(image[helper == teeth_num].max()))
             image_snipped, mask_snipped = crop_to_mask(image, temp_mask, padding=padding, input=1)
 
             print(mask_snipped.min(), mask_snipped.max())

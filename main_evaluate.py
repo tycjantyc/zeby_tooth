@@ -23,7 +23,7 @@ if __name__ == "__main__":
     if args.model == 'hyspark':
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=args.num_classes)
     else:
-        model = build_class_segmentor_model(inchannels=1, outchannels=args.num_classes, depths=[16, 32, 64, 128, 192])
+        model = build_class_segmentor_model(inchannels=1, outchannels=args.num_classes)
 
     model.load_state_dict(load(args.model_weights, weights_only=True))
     model.eval()

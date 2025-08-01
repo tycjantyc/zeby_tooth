@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from processing.utils import load_itk, norm_to_0_1, crop_to_mask
 from processing.tooth_fairy_classes import fix_tooth_fairy_classes
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
-
+from datasets.init import init_agh
 
 class AGH_Class_Segmentor_Dataset(Dataset):
     
@@ -31,24 +31,7 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         self.validation_mode = validation_mode
         self.encode_coords = encode_coords
 
-        self.lista = []
-
-        self.path_cbct = os.path.join(self.data_directory, 'db1_v1.0_nifti')
-        self.path_labels = os.path.join(self.data_directory, 'db1_v1.0_nifti_teeth_masks_single_cls_weak')
-        self.path_labels_final = os.path.join(self.data_directory, 'db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak')
-       
-        paths_cbct = sorted(os.listdir(self.path_cbct), key=lambda x: int(x.split('.')[0]))   
-        files_labels = sorted(os.listdir(self.path_labels), key=lambda x: int(x.split('.')[0]))
-        files_labels_final = sorted(os.listdir(self.path_labels_final), key=lambda x: int(x.split('.')[0]))
-
-        paths_cbct = paths_cbct[1:len(files_labels)+1]
-        
-        for file_cbct, file_label, file_label_final in zip(paths_cbct, files_labels, files_labels_final):
-            
-            file_cbct = os.path.join(self.path_cbct, file_cbct, 'image.nii.gz')
-            file_label = os.path.join(self.path_labels, file_label)
-            file_label_final = os.path.join(self.path_labels_final, file_label_final)    
-            self.lista.append((file_cbct, file_label, file_label_final))
+        self.lista = init_agh(self.data_directory)
 
         split_index = int(len(self.lista) * self.validation_split)
         
@@ -68,11 +51,8 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         paths = self.lista[index]
         path_cbct, path_label, path_label_final = paths
 
-        #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
         mask = load_itk(path_label_final)
-
-        # print(path_label, path_label_final)
 
         image, mask = crop_to_mask(image, mask, padding=5)
 
@@ -86,7 +66,6 @@ class AGH_Class_Segmentor_Dataset(Dataset):
         y0, y1 = yy
         x0, x1 = xx
 
-        #add positional layers
         z = np.linspace(z0, z1, 96)
         y = np.linspace(y0, y1, 96)
         x = np.linspace(x0, x1, 96)

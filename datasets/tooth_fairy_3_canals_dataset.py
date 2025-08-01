@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 from processing.utils import embed_in_center
 from processing.data_augmentation import *
 import SimpleITK as sitk
+from datasets.init import validation_spliter, init_canal_snippets
 
 class ToothFairy3_Canal_Dataset(Dataset):
     
@@ -20,28 +21,9 @@ class ToothFairy3_Canal_Dataset(Dataset):
         self.validation_split = validation_split
         self.validation_mode = validation_mode
 
-        self.lista = []
-
-        self.path_cbct = os.path.join(self.data_directory, 'snippets_img')
-        self.path_labels = os.path.join(self.data_directory, 'snippets_mask')
-
-        files_cbct = sorted(os.listdir(self.path_cbct))
-        files_labels = sorted(os.listdir(self.path_labels))
-         
-        for file_cbct, file_label in zip(files_cbct, files_labels):
-            
-            file_cbct = os.path.join(self.path_cbct, file_cbct)
-            file_label = os.path.join(self.path_labels, file_label)
-            self.lista.append((file_cbct, file_label))
-
-        split_index = int(len(self.lista) * self.validation_split)
-        
-        if validation_mode:
-            self.lista = self.lista[:split_index]
-        else:
-            self.lista = self.lista[split_index:]
-             
-                    
+        self.lista = init_canal_snippets(self.data_directory)
+        self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
+               
     def __len__(self):
 
         return len(self.lista)
@@ -65,8 +47,6 @@ class ToothFairy3_Canal_Dataset(Dataset):
         mask[mask<2] = 0
         mask[mask>1] = 1
 
-        print(mask.max())
-
         # new = image.copy()
         # new = sitk.GetImageFromArray(new)
 
@@ -80,12 +60,7 @@ class ToothFairy3_Canal_Dataset(Dataset):
             mask = embed_in_center(mask, self.input_size[0])
         
         else:
-            temp = np.zeros(self.input_size)
-            temp[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])] = image[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])]
-            temp_mask = np.zeros(self.input_size)
-            temp_mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])] = mask[0: min(image.shape[0], self.input_size[0]), 0: min(image.shape[1], self.input_size[1]), 0: min(image.shape[2], self.input_size[2])]
-            image = temp
-            mask = temp_mask
+            raise ValueError('Shape is not good!')
 
         if self.augmentation:
             factory = AugmentationFactory()
