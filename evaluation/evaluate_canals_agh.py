@@ -19,16 +19,16 @@ model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, free
 model.eval()
 model = model.cuda()
 
-FILE = '9'
+FILE = '17'
 THRESHOLD = 0.5
 LOSS = DiceLoss(include_background=True, sigmoid=False)
 DATA = "agh" 
-DATA = "toothfairy"
+#DATA = "toothfairy"
 
 if DATA == "agh":
     file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
     helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-    ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
+    ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/1.nii.gz'
 
 elif DATA == "toothfairy":
     file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'

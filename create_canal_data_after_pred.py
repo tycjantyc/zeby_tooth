@@ -14,10 +14,12 @@ if __name__ == "__main__":
     model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='models/weights/tooth_fairy_3d_best_agh.pt')
     model = model.cuda()
 
-    for file, label in tqdm(zip(os.listdir('data/snippets_img'), os.listdir('data/snippets_mask'))):
+    for file, label in tqdm(zip(sorted(os.listdir('data/snippets_img')), sorted(os.listdir('data/snippets_mask')))):
 
         file = os.path.join('data/snippets_img', file)
         label = os.path.join('data/snippets_mask', label)
+
+        print(file, label)
 
         image = np.load(file)
         mask = np.load(label).astype(np.uint8)
