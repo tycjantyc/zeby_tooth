@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
         mask = tc.tensor(mask[None, None, ...], dtype = tc.float32).cuda()
         input = tc.tensor(image[None, None, ...], dtype = tc.float32).cuda()
-        pred = nn.Sigmoid()(model())
+        pred = nn.Sigmoid()(model(input))
 
         print(1 - loss(pred, mask))
 
@@ -52,8 +52,7 @@ if __name__ == "__main__":
 
         pred[pred>0.5] = 1
         pred[pred<0.5] = 0
-
-        
+    
         np.save(file, image)
         np.save(label, pred)
 
