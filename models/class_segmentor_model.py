@@ -7,5 +7,6 @@ def build_class_segmentor_model(inchannels:int, outchannels:int, depths = [32, 6
     
     if weight_path is not None:
         model.load_state_dict(load(weight_path, weights_only=True))
+        print("Weights loaded!")
 
     return model

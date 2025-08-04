@@ -54,7 +54,9 @@ class ToothFairy3_Canal_Dataset(Dataset):
             image = embed_in_center(image, self.input_size[0])
             mask = embed_in_center(mask, self.input_size[0])
         else:
-            raise ValueError('Shape is not good!')
+            z, y, x = image.shape
+            image = image[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
+            mask = mask[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
 
         if self.augmentation:
             factory = AugmentationFactory()

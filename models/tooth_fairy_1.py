@@ -23,6 +23,7 @@ def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, f
     
     if weight_path is not None:
         model.load_state_dict(torch.load(weight_path, weights_only=True))
+        print("Weights loaded!")
 
     return model
 
