@@ -1,7 +1,6 @@
 from torch.utils.data import DataLoader
 from torch.optim import AdamW, Adam
 from diffusers.optimization import get_cosine_schedule_with_warmup
-from datasets.agh_class_segmentor import AGH_Class_Segmentor_Dataset
 from datasets.agh_resize_classes import AGH_Resize_Classes
 from models.class_segmentor_model import build_class_segmentor_model
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
