@@ -1,5 +1,5 @@
 import numpy as np
-from processing.utils import remove_rings_artifacts, create_random_snippet
+from processing.utils import create_random_snippet
 from processing.data_augmentation import AugmentationFactory
 from processing.multi_input import MultiInputFactory
 
@@ -13,9 +13,6 @@ def prepare_toothfairy(image: np.ndarray,
                        patchify:bool = True,
                        coords:bool = False):
     
-        if remove_ct_rings:
-            image = remove_rings_artifacts(image)
-
         image = image.astype(np.float32)
 
         assert image.shape == mask.shape
