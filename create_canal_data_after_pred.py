@@ -5,6 +5,7 @@ from processing.utils import embed_in_center
 import torch as tc
 import torch.nn as nn 
 from monai.losses import DiceLoss
+from tqdm import tqdm
 
 if __name__ == "__main__":
 
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='models/weights/tooth_fairy_3d_best_agh.pt')
     model = model.cuda()
 
-    for file, label in zip(os.listdir('data/snippets_img'), os.listdir('data/snippets_mask')):
+    for file, label in tqdm(zip(os.listdir('data/snippets_img'), os.listdir('data/snippets_mask'))):
 
         image = np.load(file)
         mask = np.load(label).astype(np.uint8)

@@ -45,7 +45,7 @@ def main(data_path = 'D:/db1_v1.0',
 
     inchannels = 1
 
-    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path='models/weights/agh_segmentor_best_1.pt', freeze = freeze)
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path='models/weights/agh_segmentor_best.pt', freeze = freeze)
     #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
