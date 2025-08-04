@@ -7,11 +7,9 @@ import torch.nn as nn
 import numpy as np
 from monai.losses import DiceFocalLoss, DiceLoss
 
-def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
+def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
 
-    #wagi = [0.1] + [1] * 32
     CRITERION = DiceFocalLoss(include_background=True, sigmoid=False, softmax=True)
-
     DEVICE = 'cuda:0'
 
     accelerator = Accelerator(
@@ -20,19 +18,15 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
     )
 
     model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        model, optimizer, train_dataloader, lr_scheduler
-    )
+        model, optimizer, train_dataloader, lr_scheduler)
 
     model = model.to(DEVICE)
-
     global_step = 0
     global_loss = 100
     
-
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader))
         progress_bar.set_description(f"Epoch {epoch}")
-
         loss_full = 0
 
         #Training phase
@@ -47,7 +41,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
                 print(label_big.min(), label_big.max())
 
 
-            clean_output = F.one_hot(label_big.long(), num_classes=34)  #32 classes
+            clean_output = F.one_hot(label_big.long(), num_classes=34)  
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
     
             clean_input = label_small.to(DEVICE)
@@ -78,7 +72,6 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
 
         loss_full = loss_full/len(train_dataloader)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
-
         loss_val_full = 0
 
         #Validation phase
@@ -89,7 +82,7 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
                     print("Invalid label found:")
                     continue
 
-                clean_output = F.one_hot(label_big.long(), num_classes=34)  #32 classes
+                clean_output = F.one_hot(label_big.long(), num_classes=34)
                 clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
                 
                 clean_input = label_small.to(DEVICE)
@@ -98,17 +91,8 @@ def train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_s
                 with accelerator.accumulate(model):
             
                     label_pred = model(clean_input)
-
-                    # if tc.isnan(label_pred):
-                    #     print("Model reutrned NaN! Abort!")
-                    #     break
-
                     loss = CRITERION(label_pred, clean_output)
                     
-                    # if tc.isnan(loss.item()):
-                    #     print("Loss reutrned NaN! Abort!")
-                    #     break
-
                 loss_val_full += loss.item()
 
         if len(val_dataloader) > 0:

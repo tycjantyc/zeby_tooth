@@ -5,7 +5,7 @@ from processing.utils import load_itk, norm_to_0_1, crop_to_mask
 from processing.tooth_fairy_classes import fix_tooth_fairy_classes
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
 from monai.transforms import Resize
-from datasets.init import init_agh, validation_spliter
+from datasets.init import init_agh, validation_spliter, init_tooth_fairy
 
 class AGH_Resize_Classes(Dataset):
     
@@ -24,7 +24,10 @@ class AGH_Resize_Classes(Dataset):
         self.validation_split = validation_split
         self.validation_mode = validation_mode
 
-        self.lista = init_agh(self.data_directory)
+        if self.data_directory.endswith('ToothFairy3_v1.0'):
+            self.lista = init_tooth_fairy(self.data_directory)
+        else:
+            self.lista = init_agh(self.data_directory)
         self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
                        
     def __len__(self):
@@ -39,7 +42,6 @@ class AGH_Resize_Classes(Dataset):
 
         label_weak = load_itk(path_label)
         label = load_itk(path_label_final)
-
 
         if self.crop:
             label_weak, label = crop_to_mask(label_weak, label, padding=5)

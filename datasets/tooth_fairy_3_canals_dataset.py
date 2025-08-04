@@ -35,12 +35,9 @@ class ToothFairy3_Canal_Dataset(Dataset):
         path_cbct, path_label = paths
 
         image = np.load(path_cbct)
-        mask = np.load(path_label)
-
-        mask = mask.astype(np.uint8)
+        mask = np.load(path_label).astype(np.uint8)
 
         masked = image[mask>0]
-
         image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
         image[mask<1] = 0 #zalewanie wszystkiego co nie jest kanałem
 
@@ -52,13 +49,10 @@ class ToothFairy3_Canal_Dataset(Dataset):
 
         # equalized = sitk.AdaptiveHistogramEqualization(image, alpha=1.0, beta=0.0, radius = 5)
         # new = sitk.GetArrayFromImage(equalized)
-
-        assert image.shape == mask.shape
         
         if image.shape[0] < self.input_size[0] and image.shape[1] < self.input_size[1] and image.shape[2] < self.input_size[2]: 
             image = embed_in_center(image, self.input_size[0])
             mask = embed_in_center(mask, self.input_size[0])
-        
         else:
             raise ValueError('Shape is not good!')
 

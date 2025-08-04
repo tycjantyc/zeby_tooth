@@ -13,7 +13,7 @@ def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, f
             param.requires_grad = True
 
     if freeze:
-        for param1 in model.mae.parameters():
+        for param1 in model.embeddings.parameters():
             param1.requires_grad = False
 
         for param2 in model.mae.parameters():

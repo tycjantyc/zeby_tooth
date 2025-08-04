@@ -1,4 +1,3 @@
-#import tomopy      <- problem with this library!!!
 import numpy as np
 import SimpleITK as sitk
 
@@ -13,31 +12,18 @@ def load_itk(filename:str, clamp:tuple[int, int] = None):
     ct_scan = sitk.GetArrayFromImage(itkimage)
     return ct_scan
 
-def remove_rings_artifacts(image: np.ndarray):  #slightly changes the image but worth testing
-    image_without_rings = tomopy.misc.corr.remove_ring(image,             
-                                        center_x=image.shape[1]/2,
-                                        center_y=image.shape[2]/2,
-                                        thresh=100)
-    
-    return image_without_rings
-
-
 def norm_to_0_1(image: np.ndarray, min = -1000, max = 3000):
     return (image - min)/(max - min)
 
-def norm_standard(image: np.ndarray):
-    mean = image.mean()
-    standard_deviation = image.std() + 1e-5
-    normal_image = (image - mean)/standard_deviation
-
-    return normal_image
+def norm_0_1_min_max(image: np.ndarray):
+    return (image - image.min())/(image.max() - image.min())
 
 def norm_factory(mode_name = 'none'):
     if mode_name == 'none':
         return lambda x:x
     
-    elif mode_name == 'standard':
-        return norm_standard
+    elif mode_name == 'minmax':
+        return norm_0_1_min_max
     
     elif mode_name == '01':
         return norm_to_0_1
@@ -64,16 +50,14 @@ def crop(image: np.ndarray, new_dims: list[int, int, int]):
 
 
 def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, coordss = False):
-    # Find bounding box of non-zero mask
-    coords = np.array(np.nonzero(mask))
 
+    coords = np.array(np.nonzero(mask))
     if coords.sum() == 0:
          return volume, mask
 
     zmin, ymin, xmin = coords.min(axis=1)
     zmax, ymax, xmax = coords.max(axis=1)
 
-    # Apply padding
     zmin = max(zmin - padding, 0)
     ymin = max(ymin - padding, 0)
     xmin = max(xmin - padding, 0)
@@ -81,10 +65,6 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, c
     zmax = min(zmax + padding, volume.shape[0])
     ymax = min(ymax + padding, volume.shape[1])
     xmax = min(xmax + padding, volume.shape[2])
-
-    # Crop
-    # if zmax - zmin < input or ymax-ymin < input or xmax-xmin < input:
-    #     return volume[zmin:zmin+input, ymin:ymin+input+1, xmin:xmin+input+1], mask[zmin:zmin+input+1, ymin:ymin+input+1, xmin:xmin+input+1]
 
     cropped_volume = volume[zmin:zmax, ymin:ymax, xmin:xmax]
     cropped_mask = mask[zmin:zmax, ymin:ymax, xmin:xmax]
@@ -130,21 +110,12 @@ import numpy as np
 
 def embed_in_center(small_volume: np.ndarray, big_volume_size: int, coords:bool = False) -> np.ndarray:
     
-    if small_volume.ndim != 3:
-        raise ValueError("small_volume must be a 3D numpy array.")
-    
-    small_shape = small_volume.shape
-    if any(s > big_volume_size for s in small_shape):
-        raise ValueError("small_volume is larger than big_volume in at least one dimension.")
-
-    # Create the big volume filled with zeros
+    small_shape = small_volume.shape    
     big_volume = np.zeros((big_volume_size, big_volume_size, big_volume_size), dtype=small_volume.dtype)
 
-    # Calculate the starting indices for centering
     start = [(big_volume_size - s) // 2 for s in small_shape]
     end = [start[i] + small_shape[i] for i in range(3)]
 
-    # Embed the small volume into the big one
     big_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = small_volume
 
     if coords:

@@ -5,7 +5,7 @@ from datasets.agh_class_segmentor import AGH_Class_Segmentor_Dataset
 from datasets.agh_resize_classes import AGH_Resize_Classes
 from models.class_segmentor_model import build_class_segmentor_model
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
-from training.train_segmentor_agh import train_segmentor_agh
+from training.train_segmentor import train_segmentor
 from processing.utils import norm_factory
 import argparse
 
@@ -20,6 +20,7 @@ def main(data_path = 'D:/db1_v1.0',
          num_epochs = 10,
          lr_warmup_steps = 20,
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
+         crop = True,
          num_workers = 0,
          pin_memory = False,
          prefetch_factor = None): 
@@ -34,14 +35,10 @@ def main(data_path = 'D:/db1_v1.0',
         prefetch_factor = None
         
     print(f"Learning parameters: \n Data path: {data_path}\n Batch size: {batch_size}\n Normalization: {normalization}\n Augmentation: {augmentation}\n Learning rate: {learning_rate}\n Weight decay: {weight_decay}\n Number of epochs: {num_epochs}\n Channels: {channels}\n Number of workers: {num_workers}")
-
     norm_func = norm_factory(normalization)
-
-    # dataset_train = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=augmentation, channels=channels, validation_split=0.05, validation_mode=False)
-    # dataset_val = AGH_Class_Segmentor_Dataset(data_directory=data_path, clamp = (min_clamp, max_clamp), normalization=norm_func,augmentation=False, channels=channels, validation_split=0.05, validation_mode=True)
     
-    dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation, validation_split=0.05, validation_mode=False)
-    dataset_val = AGH_Resize_Classes(data_directory=data_path, augmentation=False, validation_split=0.05, validation_mode=True)
+    dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation,crop=crop, validation_split=0.05, validation_mode=False)
+    dataset_val = AGH_Resize_Classes(data_directory=data_path, augmentation=False, crop=crop, validation_split=0.05, validation_mode=True)
     
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
@@ -49,7 +46,7 @@ def main(data_path = 'D:/db1_v1.0',
     inchannels = 1
 
     model = build_class_segmentor_model(inchannels=inchannels, outchannels=34)
-    #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=2, freeze=False)
+    #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
@@ -58,7 +55,7 @@ def main(data_path = 'D:/db1_v1.0',
         num_training_steps=(len(train_dataloader) * num_epochs),
     )
 
-    train_segmentor_agh(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
+    train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
@@ -70,6 +67,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--normalization', type=str, required=False, default='none', choices=['standard', '01', 'none'])
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=False)
+    arg_parser.add_argument('--crop', required=False, default=True)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
@@ -84,6 +82,7 @@ if __name__ == '__main__':
          normalization=args.normalization,
          channels=args.channels,
          augmentation=args.augmentation, 
+         crop = args.crop,
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,
          prefetch_factor=args.prefetch_factor

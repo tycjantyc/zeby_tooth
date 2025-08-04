@@ -9,34 +9,40 @@ from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 from models.class_segmentor_model import build_class_segmentor_model
 import torch as tc
 import torch.nn as nn
-from evaluation.evaluate_agh_segmentor import evaluate_agh
+from processing.tooth_fairy_classes import teeth_instance, only_canal_classes
 from processing.utils import load_itk, crop_to_mask
 from processing.utils import embed_in_center
 from tqdm import tqdm
 from monai.losses import DiceLoss
 
-
-
-model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False)
-model.load_state_dict(tc.load('../models/weights/tooth_fairy_3d_best_agh.pt', weights_only=True))
+model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='../models/weights/tooth_fairy_3d_best_agh.pt')
 model.eval()
+model = model.cuda()
 
 FILE = '9'
-THRESHOLD = 0.3
-
-file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
-helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
-
+THRESHOLD = 0.5
 LOSS = DiceLoss(include_background=True, sigmoid=False)
+DATA = "agh" 
+DATA = "toothfairy"
 
-model = model.cuda()
+if DATA == "agh":
+    file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
+    helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
+    ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
+
+elif DATA == "toothfairy":
+    file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
+    helper_path = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
+    ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
+    
 
 image = load_itk(file)
 helper = load_itk(helper_path)
 ground_truth = load_itk(ground_truth)
 
-print(image.shape)
+if DATA == "toothfairy":
+    helper = teeth_instance(helper)
+    ground_truth = only_canal_classes(ground_truth)
 
 canal_mask = np.zeros(image.shape)
 
@@ -50,10 +56,7 @@ for teeth_num in tqdm(np.unique(helper)[1:]):
     image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=2, input=1, coordss=True)
     gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=2, input=1, coordss=False)
     
-    print(image_snipped.shape)
-
     if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
-        print('ok')
         image_snip_2, cords_2 = embed_in_center(image_snipped, 96, coords=True)
         mask_snip_2 = embed_in_center(mask_snipped, 96, coords=False)
         gt_snip_2 = embed_in_center(gt_snipped, 96, coords=False)
@@ -71,16 +74,14 @@ for teeth_num in tqdm(np.unique(helper)[1:]):
         
         print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
 
-        output = output.detach().cpu().numpy()[0, 0]
+        start, end = cords_2
+        output = output.detach().cpu().numpy()[0, 0, start[0]:end[0], start[1]:end[1], start[2]:end[2]]
         output[output > THRESHOLD] = 1
         output[output < THRESHOLD] = 0
 
         z_min, z_max, y_min, y_max, x_min, x_max = coords
-        start, end = cords_2
-        
-        z1 = max(0, z_min-start[0])
 
-        canal_mask[z1:z_max+96-end[0], y_min - start[1]:y_max+96-end[1], x_min - start[2]:x_max+96-end[2]] = output[z1 - z_min + start[0]:]
+        canal_mask[z_min:z_max, y_min:y_max, x_min:x_max] = output
         del output
         tc.cuda.empty_cache()
      
@@ -137,4 +138,15 @@ nifti_img = sitk.GetImageFromArray(canal_mask.astype(np.uint8))
 original = sitk.ReadImage(helper_path)
 nifti_img.CopyInformation(original)
 
-sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_{FILE}.nii.gz')
+if DATA == "toothfairy":
+    sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_tf_{FILE}.nii.gz')
+else:
+    sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_{FILE}.nii.gz')
+
+def dice(mask1, mask2):
+    tp = np.count_nonzero((mask1+mask2) == 2)
+    fp = np.count_nonzero((mask1+mask2) == 1)
+
+    return 2*tp/(2*tp+fp)
+
+print(f"Dice score: {dice(canal_mask, ground_truth)}")

@@ -60,10 +60,11 @@ def init_tooth_fairy(data_directory):
     files_cbct = sorted(os.listdir(path_cbct))
     files_labels = sorted(os.listdir(path_labels))
          
-    for file_cbct, file_label in zip(files_cbct, files_labels):
+    for file_cbct, file_label_1, file_label_2 in zip(files_cbct, files_labels, files_labels):
             
         file_cbct = os.path.join(path_cbct, file_cbct)
-        file_label = os.path.join(path_labels, file_label)
-        lista.append((file_cbct, file_label))
+        file_label_1 = os.path.join(path_labels, file_label_1)
+        file_label_2 = os.path.join(path_labels, file_label_2)
+        lista.append((file_cbct, file_label_1, file_label_2))
 
     return lista

@@ -7,7 +7,7 @@ from create_canal_segmentation_data_agh import create_canal_data_agh
 from tqdm import tqdm
 from monai.transforms import Spacing
 
-def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64):
+def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64, rescale_up = True):
 
     path_images = os.path.join(data_dir, 'imagesTr')
     path_labels = os.path.join(data_dir, 'labelsTr')
@@ -52,10 +52,10 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64)
             print(mask_snipped.min(), mask_snipped.max())
             print(image_snipped.shape)
 
-            rescale = Spacing(pixdim=(2/3, 2/3, 2/3), mode = 'bilinear')
-
-            image_snipped = rescale(image_snipped)
-            mask_snipped = rescale(mask_snipped)
+            if rescale_up:
+                rescale = Spacing(pixdim=(2/3, 2/3, 2/3), mode = 'bilinear')
+                image_snipped = rescale(image_snipped)
+                mask_snipped = rescale(mask_snipped)
 
             if image_snipped.shape[0] > 96:
 
@@ -79,10 +79,11 @@ if __name__ == "__main__":
     arg_parser.add_argument('--db_dir', type=str, required=False, default='D:/ToothFairy3')
     arg_parser.add_argument('--padding', type=int, required=False, default=5)
     arg_parser.add_argument('--input', type=float, required=False, default=96)
+    arg_parser.add_argument('--rescale', type=str, default=True, required=False)
     args = arg_parser.parse_args()
 
     if args.db_dir.endswith('ToothFairy3_v1.0') or args.db_dir.endswith('ToothFairy3'):
-        create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
+        create_canal_data(data_dir=args.db_dir, padding=args.padding, input_size=args.input, rescale_up=args.rescale)
     else:
         create_canal_data_agh(data_dir=args.db_dir, padding=args.padding, input_size=args.input)
 

@@ -45,7 +45,7 @@ class ToothFairy3_Dataset(Dataset):
     def __getitem__(self, index): 
 
         paths = self.lista[index]
-        path_cbct, path_label = paths
+        path_cbct, path_label, path_label_2 = paths
 
         image = load_itk(path_cbct, clamp = self.clamp)
         mask = load_itk(path_label)

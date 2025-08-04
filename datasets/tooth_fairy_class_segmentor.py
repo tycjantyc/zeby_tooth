@@ -37,28 +37,23 @@ class ToothFairy3_Class_Segmentor_Dataset(Dataset):
 
         self.lista = init_tooth_fairy(self.data_directory)
         self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
- 
-        
-        
-                    
+                 
     def __len__(self):
 
         return len(self.lista)
 
-
     def __getitem__(self, index): 
 
         paths = self.lista[index]
-        path_cbct, path_label = paths
+        path_cbct, path_label, path_label_2 = paths
 
-        #image = load_itk(path_cbct, clamp = self.clamp)
         image = load_itk(path_label)
-        mask = load_itk(path_label)
+        mask = load_itk(path_label_2)
 
         image = teeth_semantic(image)
         mask = teeth_instance(mask)
 
-        image, mask = crop_to_mask(image, mask, padding=48, input = self.input_size[0])
+        image, mask = crop_to_mask(image, mask, padding=5, input = self.input_size[0])
 
         assert image.shape == mask.shape
 
