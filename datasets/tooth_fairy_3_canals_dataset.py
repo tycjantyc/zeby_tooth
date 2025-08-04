@@ -55,8 +55,13 @@ class ToothFairy3_Canal_Dataset(Dataset):
             mask = embed_in_center(mask, self.input_size[0])
         else:
             z, y, x = image.shape
-            image = image[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
-            mask = mask[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
+            temp_img = np.zeros((96, 96, 96))
+            temp_mask = np.zeros((96, 96, 96))
+            temp_img[0:min(96, z), 0:min(96, y):, 0:min(96, x)] = image[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
+            temp_mask[0:min(96, z), 0:min(96, y):, 0:min(96, x)] = mask[0:min(96, z), 0:min(96, y):, 0:min(96, x)]
+
+            image = temp_img
+            mask = temp_mask
 
         if self.augmentation:
             factory = AugmentationFactory()
