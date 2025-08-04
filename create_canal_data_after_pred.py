@@ -16,6 +16,9 @@ if __name__ == "__main__":
 
     for file, label in tqdm(zip(os.listdir('data/snippets_img'), os.listdir('data/snippets_mask'))):
 
+        file = os.path.join('data/snippets_img', file)
+        label = os.path.join('data/snippets_mask', label)
+
         image = np.load(file)
         mask = np.load(label).astype(np.uint8)
 
