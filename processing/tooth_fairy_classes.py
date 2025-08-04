@@ -79,6 +79,41 @@ classes = {
     "Lower Right Third Molar (Wisdom Tooth) Pulp": 148
 }
 
+tooth_fairy_to_european = {
+    1: 8,
+    2: 7,
+    3: 6,
+    4: 5,
+    5: 4,
+    6: 3,
+    7: 2,
+    8: 1,
+    9: 9,
+    10:10,
+    11:11,
+    12:12,
+    13:13,
+    14:14,
+    15:15,
+    16:16,
+    17:24,
+    18:23,
+    19:22,
+    20:21,
+    21:20,
+    22:19,
+    23:18,
+    24:17,
+    25:25,
+    26:26,
+    27:27,
+    28:28,
+    29:29,
+    30:30,
+    31:31,
+    32:32
+}
+
 new_classes = dict()
 
 for num, key in enumerate(classes.keys()):
@@ -210,7 +245,7 @@ def teeth_instance(volume):
     
     for i in range(4):
         for j in range(8):
-            volume_new[(volume == (11+10*i+j)) | (volume == (11+100+10*i+j))] = i*8+j+1
+            volume_new[(volume == (11+10*i+j)) | (volume == (11+100+10*i+j))] = tooth_fairy_to_european[i*8+j+1]
     
     return volume_new
 
