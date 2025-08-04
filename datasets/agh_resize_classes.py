@@ -50,13 +50,16 @@ class AGH_Resize_Classes(Dataset):
         if self.crop:
             label_weak, label = crop_to_mask(label_weak, label, padding=5)
 
+        label_weak = label_weak.astype(np.float32)
+        label = label.astype(np.float32)
+
         down = Resize(spatial_size = self.input_size, 
                       size_mode='all', 
                       mode="trilinear", 
                       align_corners=None, 
                       anti_aliasing=True, 
                       anti_aliasing_sigma=None,
-                      dtype=np.uint8, 
+                      dtype=np.float32, 
                       lazy=False)
         
         label_weak = down.__call__(label_weak[None, ...])
