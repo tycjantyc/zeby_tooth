@@ -2,7 +2,7 @@ import os
 import numpy as np
 from torch.utils.data import Dataset
 from processing.utils import load_itk, norm_to_0_1, crop_to_mask
-from processing.tooth_fairy_classes import fix_tooth_fairy_classes
+from processing.tooth_fairy_classes import teeth_instance, teeth_semantic
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
 from monai.transforms import Resize
 from datasets.init import init_agh, validation_spliter, init_tooth_fairy
@@ -42,6 +42,10 @@ class AGH_Resize_Classes(Dataset):
 
         label_weak = load_itk(path_label)
         label = load_itk(path_label_final)
+
+        if self.data_directory.endswith('ToothFairy3_v1.0'):
+            label_weak = teeth_semantic(label_weak)
+            label = teeth_instance(label)
 
         if self.crop:
             label_weak, label = crop_to_mask(label_weak, label, padding=5)
