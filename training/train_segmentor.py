@@ -25,7 +25,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
     global_loss = 100
     
     for epoch in range(num_epochs):
-        progress_bar = tqdm(total=len(train_dataloader))
+        progress_bar = tqdm(total=len(train_dataloader), ncols=100, dynamic_ncols=True)
         progress_bar.set_description(f"Epoch {epoch}")
         loss_full = 0
 

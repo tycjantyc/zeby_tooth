@@ -20,6 +20,7 @@ def main(data_path = 'D:/db1_v1.0',
          lr_warmup_steps = 20,
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          crop = True,
+         freeze = False, 
          num_workers = 0,
          pin_memory = False,
          prefetch_factor = None): 
@@ -44,7 +45,7 @@ def main(data_path = 'D:/db1_v1.0',
 
     inchannels = 1
 
-    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34)
+    model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path='models/weights/agh_segmentor_best.pt', freeze = freeze)
     #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
@@ -67,6 +68,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=False)
     arg_parser.add_argument('--crop', required=False, default=True)
+    arg_parser.add_argument('--freeze', required=False, default=False)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
@@ -81,10 +83,9 @@ if __name__ == '__main__':
          normalization=args.normalization,
          channels=args.channels,
          augmentation=args.augmentation, 
+         freeze = args.freeze,
          crop = args.crop,
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,
          prefetch_factor=args.prefetch_factor
          )
-
-

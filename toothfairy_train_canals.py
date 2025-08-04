@@ -103,5 +103,3 @@ if __name__ == '__main__':
          pin_memory=args.pin_memory,
          prefetch_factor=args.prefetch_factor
          )
-
-
