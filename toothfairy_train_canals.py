@@ -23,6 +23,7 @@ def main(data_path = 'data',
          channels = [],  # Choose from: 'sobel', 'clahe', 'median'
          validation_split = 0.05,
          weights_file = 'models/weights/tooth_fairy_3d_best.pt',
+         freeze = False,
          lambda_dice = 1,
          lambda_focal = 1,
          alpha_focal = 0.9,
@@ -50,7 +51,7 @@ def main(data_path = 'data',
     inchannels = 1 + len(channels)
 
     if model == 'hyspark':
-        model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=False, weight_path=weights_file)
+        model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=1, img_size=inputsize, freeze=freeze, weight_path=weights_file)
     elif model == 'resunet3dse':
         model = build_class_segmentor_model(inchannels=inchannels, outchannels=1, weight_path=weights_file)
 
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--lambda_dice', type=float, required=False, default=1.0)
     arg_parser.add_argument('--lambda_focal', type=float, required=False, default=2.0)
     arg_parser.add_argument('--alpha', type=float, required=False, default=0.5)
+    arg_parser.add_argument('--freeze', required=False, default=False)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
@@ -96,6 +98,7 @@ if __name__ == '__main__':
          lambda_dice=args.lambda_dice,
          lambda_focal=args.lambda_focal,
          alpha_focal=args.alpha,
+         freeze=args.freeze,
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,
          prefetch_factor=args.prefetch_factor
