@@ -72,17 +72,17 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
 
                 z_half = image_snipped.shape[0]//2
 
-                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_1.npy', arr=image_snipped[:z_half])
-                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_1.npy', arr=mask_snipped[:z_half])
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_1.npy', arr=image_snipped[:z_half].astype(np.uint16))
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_1.npy', arr=mask_snipped[:z_half].astype(np.float16))
 
                 global_num += 1
 
-                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_2.npy', arr=image_snipped[z_half:])
-                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_2.npy', arr=mask_snipped[z_half:])
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}_2.npy', arr=image_snipped[z_half:].astype(np.uint16))
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}_2.npy', arr=mask_snipped[z_half:].astype(np.float16))
             
             else:
-                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}.npy', arr=image_snipped)
-                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}.npy', arr=mask_snipped)
+                np.save(file=f'data/snippets_img/{number_image}_{teeth_num}.npy', arr=image_snipped.astype(np.uint16))
+                np.save(file=f'data/snippets_mask/{number_image}_{teeth_num}.npy', arr=mask_snipped.astype(np.float16))
 
 
 if __name__ == "__main__":
