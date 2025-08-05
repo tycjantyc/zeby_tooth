@@ -26,9 +26,9 @@ if __name__ == "__main__":
 
         masked = image[mask>0]
         image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
-        image[mask<1] = 0 #zalewanie wszystkiego co nie jest kanałem
+        image[mask == 0] = 0 #zalewanie wszystkiego co nie jest kanałem
 
-        mask[mask<2] = 0
+        mask[mask<=1] = 0
         mask[mask>1] = 1
 
         if image.shape[0] < input_size[0] and image.shape[1] < input_size[1] and image.shape[2] < input_size[2]: 
