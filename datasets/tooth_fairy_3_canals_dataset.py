@@ -39,9 +39,9 @@ class ToothFairy3_Canal_Dataset(Dataset):
 
         masked = image[mask>0]
         image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
-        image[mask<1] = 0 #zalewanie wszystkiego co nie jest kanałem
+        image[mask==0] = 0 #zalewanie wszystkiego co nie jest kanałem
 
-        mask[mask<2] = 0
+        mask[mask<=1] = 0
         mask[mask>1] = 1
 
         # new = image.copy()
