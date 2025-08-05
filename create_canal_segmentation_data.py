@@ -57,15 +57,13 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
                       size_mode='all', 
                       mode="trilinear", 
                       align_corners=None, 
-                      anti_aliasing=True, 
+                      anti_aliasing=False, 
                       anti_aliasing_sigma=None,
                       dtype=np.float32, 
                       lazy=False)
         
                 image_snipped = down.__call__(image_snipped[None, ...])[0]
                 mask_snipped = down.__call__(mask_snipped[None, ...])[0]
-
-                mask_snipped = mask_snipped.astype(np.uint8)
 
             if image_snipped.shape[0] > 96:
 

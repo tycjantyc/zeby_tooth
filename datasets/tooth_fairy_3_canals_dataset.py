@@ -35,7 +35,7 @@ class ToothFairy3_Canal_Dataset(Dataset):
         path_cbct, path_label = paths
 
         image = np.load(path_cbct)
-        mask = np.load(path_label).astype(np.uint8)
+        mask = np.load(path_label)
 
         masked = image[mask>0]
         image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
