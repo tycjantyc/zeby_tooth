@@ -51,6 +51,8 @@ if __name__ == "__main__":
         input = tc.tensor(image[None, None, ...], dtype = tc.float32).cuda()
         pred = nn.Sigmoid()(model(input))
 
+        print(mask.shape)
+
         print(1 - loss(pred, mask).item())
         lista.append(1 - loss(pred, mask).item())
 
