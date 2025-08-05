@@ -63,7 +63,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
                       lazy=False)
         
                 image_snipped = down.__call__(image_snipped[None, ...])
-                image_snipped = down.__call__(image_snipped[None, ...])[0]
+                mask_snipped = down.__call__(mask_snipped[None, ...])[0]
 
             if image_snipped.shape[0] > 96:
 
