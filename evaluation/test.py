@@ -21,6 +21,8 @@ file2 = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/4.nii.gz'
 image = load_itk(file)
 mask = load_itk(file2)
 
+image, mask = np.flip(image, axis=(0, 2)), np.flip(mask, axis=(0, 2))
+
 # image = teeth_semantic(image)
 # mask = teeth_instance(mask)
 

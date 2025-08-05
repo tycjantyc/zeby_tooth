@@ -47,8 +47,8 @@ class AGH_Resize_Classes(Dataset):
             label_weak = teeth_semantic(label_weak)
             label = teeth_instance(label)
         else:
-            label_weak = np.flip(label_weak, axis=0)
-            label = np.flip(label, axis=0)
+            label_weak = np.flip(label_weak, axis=(0,2))
+            label = np.flip(label, axis=(0, 2))
 
         if self.crop:
             label_weak, label = crop_to_mask(label_weak, label, padding=5)
