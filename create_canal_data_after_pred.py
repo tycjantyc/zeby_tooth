@@ -11,8 +11,9 @@ if __name__ == "__main__":
 
     loss = DiceLoss(sigmoid=False, include_background=True)
     input_size = (96, 96, 96)
-    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='models/weights/tooth_fairy_3d_best_agh.pt')
+    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='models/weights/tooth_fairy_3d_best.pt')
     model = model.cuda()
+    model.eval()
     lista = []
 
     for file, label in tqdm(zip(sorted(os.listdir('data/snippets_img')), sorted(os.listdir('data/snippets_mask')))):
