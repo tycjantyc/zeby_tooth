@@ -37,6 +37,7 @@ if __name__ == "__main__":
             image = embed_in_center(image, input_size[0])
             mask = embed_in_center(mask, input_size[0])
         else:
+            print('ok')
             z, y, x = image.shape
             temp_img = np.zeros((96, 96, 96))
             temp_mask = np.zeros((96, 96, 96))
