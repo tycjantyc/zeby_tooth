@@ -23,8 +23,8 @@ if __name__ == "__main__":
 
         print(file, label)
 
-        image = np.load(file)
-        mask = np.load(label)
+        image = np.load(file).astype(np.float32)
+        mask = np.load(label).astype(np.float32)
 
         masked = image[mask>0]
         image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
