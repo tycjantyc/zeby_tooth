@@ -30,9 +30,6 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
 
     for number_image, (file_img, file_lab) in tqdm(enumerate(zip(paths_images, paths_labels))):
         
-        if number_image < 349:
-            continue
-
         number_image += 1
 
         image = load_itk(file_img)
