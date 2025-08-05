@@ -12,8 +12,8 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
     path_images = os.path.join(data_dir, 'imagesTr')
     path_labels = os.path.join(data_dir, 'labelsTr')
 
-    paths_images = [os.path.join(path_images, i) for i in os.listdir(path_images)]
-    paths_labels = [os.path.join(path_labels, i) for i in os.listdir(path_labels)]
+    paths_images = [os.path.join(path_images, i) for i in sorted(os.listdir(path_images))]
+    paths_labels = [os.path.join(path_labels, i) for i in sorted(os.listdir(path_labels))]
 
     if os.path.isdir('data'):
         pass

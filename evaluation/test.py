@@ -13,7 +13,7 @@ from processing.utils import load_itk, crop_to_mask
 from evaluation.evaluate_agh_segmentor import evaluate_agh
 
 model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
-model.load_state_dict(tc.load('../models/weights/agh_segmentor_best.pt', weights_only=True))
+model.load_state_dict(tc.load('../models/weights/agh_segmentor_best_1.pt', weights_only=True))
 #file = 'D:/ToothFairy3/labelsTr/ToothFairy3F_001.nii'
 file = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/4.nii.gz'
 file2 = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/4.nii.gz'
