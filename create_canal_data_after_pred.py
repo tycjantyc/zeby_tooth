@@ -13,6 +13,7 @@ if __name__ == "__main__":
     input_size = (96, 96, 96)
     model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='models/weights/tooth_fairy_3d_best_agh.pt')
     model = model.cuda()
+    lista = []
 
     for file, label in tqdm(zip(sorted(os.listdir('data/snippets_img')), sorted(os.listdir('data/snippets_mask')))):
 
@@ -48,7 +49,8 @@ if __name__ == "__main__":
         input = tc.tensor(image[None, None, ...], dtype = tc.float32).cuda()
         pred = nn.Sigmoid()(model(input))
 
-        print(1 - loss(pred, mask))
+        print(1 - loss(pred, mask).item())
+        lista.append(1 - loss(pred, mask).item())
 
         pred = pred.detach().cpu().numpy()[0, 0]
 
@@ -58,7 +60,7 @@ if __name__ == "__main__":
         np.save(file, image)
         np.save(label, pred)
 
-
+    print(sum(lista)/len(lista))
 
 
 
