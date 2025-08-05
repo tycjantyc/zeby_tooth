@@ -53,7 +53,7 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
             print(image_snipped.shape)
 
             if rescale_up:
-                down = Resize(spatial_size = (s*1.5 for s in image.shape), 
+                down = Resize(spatial_size = ([int(s*1.5) for s in image.shape]), 
                       size_mode='all', 
                       mode="trilinear", 
                       align_corners=None, 
