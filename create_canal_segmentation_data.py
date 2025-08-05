@@ -5,7 +5,7 @@ from processing.tooth_fairy_classes import teeth_canal_instance
 import argparse
 from create_canal_segmentation_data_agh import create_canal_data_agh
 from tqdm import tqdm
-from monai.transforms import Spacing
+from monai.transforms import Resize
 
 def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64, rescale_up = True):
 
@@ -53,9 +53,17 @@ def create_canal_data(data_dir = 'D:/ToothFairy3', padding = 4, input_size = 64,
             print(image_snipped.shape)
 
             if rescale_up:
-                rescale = Spacing(pixdim=(2/3, 2/3, 2/3), mode = 'bilinear')
-                image_snipped = rescale(image_snipped)
-                mask_snipped = rescale(mask_snipped)
+                down = Resize(spatial_size = (s*1.5 for s in image.shape), 
+                      size_mode='all', 
+                      mode="trilinear", 
+                      align_corners=None, 
+                      anti_aliasing=True, 
+                      anti_aliasing_sigma=None,
+                      dtype=np.float32, 
+                      lazy=False)
+        
+                image_snipped = down.__call__(image_snipped[None, ...])
+                image_snipped = down.__call__(image_snipped[None, ...])[0]
 
             if image_snipped.shape[0] > 96:
 
