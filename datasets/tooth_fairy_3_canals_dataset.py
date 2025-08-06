@@ -38,7 +38,8 @@ class ToothFairy3_Canal_Dataset(Dataset):
         mask = np.load(path_label).astype(np.float32)
 
         masked = image[mask>0]
-        image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
+        if len(masked) > 0:
+            image[mask>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5) #normalizacja dla lepszego kontrastu
         image[mask==0] = 0 #zalewanie wszystkiego co nie jest kanałem
 
         mask[mask<=1] = 0
