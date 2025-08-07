@@ -45,6 +45,8 @@ def main(data_path = 'data',
     dataset_train = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=augmentation, validation_split=validation_split)
     dataset_val = ToothFairy3_Canal_Dataset(data_directory=data_path, input_size=(inputsize, inputsize, inputsize), augmentation=False, validation_split=validation_split, validation_mode=True)
     
+    print(dataset_val.lista)
+
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=1, shuffle=False, num_workers=0, pin_memory=False, prefetch_factor=None)
 
