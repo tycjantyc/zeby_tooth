@@ -5,7 +5,7 @@ import os
 
 def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, freeze = True, weight_path = None):
 
-    model = Hybird(in_channel=in_channel,n_classes = n_classes, channels = (64, 128, 256, 512, 768))
+    model = Hybird(in_channel=in_channel,n_classes = n_classes, channels = (32, 64, 128, 256, 384))
     
     if in_channel != 1:
         model.embeddings.stem = nn.Conv3d(in_channels=in_channel, out_channels=model.embeddings.channels[0], kernel_size=3, stride=1, padding=1)
