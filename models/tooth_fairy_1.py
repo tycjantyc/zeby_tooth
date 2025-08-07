@@ -5,7 +5,7 @@ import os
 
 def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, freeze = True, weight_path = None):
 
-    model = Hybird(in_channel=in_channel,n_classes = n_classes, channels = 2*(32, 64, 128, 256, 384))
+    model = Hybird(in_channel=in_channel,n_classes = n_classes, channels = (64, 128, 256, 384, 512))
     
     if in_channel != 1:
         model.embeddings.stem = nn.Conv3d(in_channels=in_channel, out_channels=model.embeddings.channels[0], kernel_size=3, stride=1, padding=1)
@@ -21,7 +21,7 @@ def build_hyspark_tooth_fairy_1(in_channel = 1, n_classes = 77, img_size = 96, f
 
     model.decoder.out = UnetOutBlock(in_channels=model.decoder.out.in_channels, n_classes=n_classes)
     
-    if weight_path is not None:
+    if weight_path is not None and os.path.isfile(weight_path):
         model.load_state_dict(torch.load(weight_path, weights_only=True))
         print("Weights loaded!")
 

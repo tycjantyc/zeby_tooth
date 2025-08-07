@@ -79,6 +79,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--augmentation', required=False, default=True)
     arg_parser.add_argument('--model', choices=['hyspark', 'resunet3dse'])
     arg_parser.add_argument('--lambda_dice', type=float, required=False, default=1.0)
+    arg_parser.add_argument('--weight_path', required=False, default='models/weights/tooth_fairy_3d_best.pt')
     arg_parser.add_argument('--lambda_focal', type=float, required=False, default=2.0)
     arg_parser.add_argument('--alpha', type=float, required=False, default=0.5)
     arg_parser.add_argument('--freeze', required=False, default=False)
@@ -96,6 +97,7 @@ if __name__ == '__main__':
          inputsize=args.input_size,
          channels=args.channels,
          model = args.model,
+         weights_file=args.weight_path,
          augmentation=args.augmentation, 
          lambda_dice=args.lambda_dice,
          lambda_focal=args.lambda_focal,
