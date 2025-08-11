@@ -5,15 +5,11 @@ import torch
 class AugmentationFactory():
     def __init__(self):
         self.transform = tio.Compose([
-                                        tio.RandomFlip(axes=(0, 1, 2), flip_probability=0.5)
-                                        # tio.RandomAffine(
-                                        #     scales=(0.95, 1.05),
-                                        #     degrees=5,
-                                        #     translation=0,
-                                        #     center='image',
-                                        #     default_pad_value='mean',
-                                        #     p=0.5
-                                        # ), 
+                                        tio.RandomFlip(axes=(0, 1, 2), flip_probability=0.5),
+                                        tio.RandomAffine(
+                                            scales=(0.9, 1.2),
+                                            degrees=15,
+                                        )
                                         #tio.RandomGamma(log_gamma=(-0.2, 0.2), p=0.3)
                                     ])
 

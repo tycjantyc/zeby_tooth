@@ -28,9 +28,21 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
         progress_bar = tqdm(total=len(train_dataloader), ncols=100, dynamic_ncols=True)
         progress_bar.set_description(f"Epoch {epoch}")
         loss_full = 0
+        missed = 0
 
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
+
+            labels = np.unique(label_big)[1:]
+
+            jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
+            trzonowe = (2 in labels and 18 in labels) or (15 in labels and 31 in labels)
+
+            if jedynki and trzonowe:
+                pass
+            else:
+                missed += 1
+                continue
 
             if (label_big < 0).any() or (label_big >= 34).any():
                 print("Invalid label found:")
@@ -73,6 +85,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
         loss_full = loss_full/len(train_dataloader)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
         loss_val_full = 0
+        print(f"Pominięte: {missed}")
 
         #Validation phase
         with tc.no_grad():

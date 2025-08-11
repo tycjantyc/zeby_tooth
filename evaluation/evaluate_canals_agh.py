@@ -15,11 +15,14 @@ from processing.utils import embed_in_center
 from tqdm import tqdm
 from monai.losses import DiceLoss
 
-model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path='../models/weights/tooth_fairy_3d_best_agh.pt')
+PATH = '../models/weights/tooth_fairy_3d_best_agh.pt'
+PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
+
+model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
 model.eval()
 model = model.cuda()
 
-FILE = '17'
+FILE = '10'
 THRESHOLD = 0.5
 LOSS = DiceLoss(include_background=True, sigmoid=False)
 DATA = "agh" 
@@ -28,7 +31,7 @@ DATA = "agh"
 if DATA == "agh":
     file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
     helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-    ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/1.nii.gz'
+    ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
 
 elif DATA == "toothfairy":
     file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
@@ -55,6 +58,9 @@ for teeth_num in tqdm(np.unique(helper)[1:]):
 
     image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=2, input=1, coordss=True)
     gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=2, input=1, coordss=False)
+
+    if image_snipped.max() > 5000:
+        continue
     
     if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
         image_snip_2, cords_2 = embed_in_center(image_snipped, 96, coords=True)
@@ -130,7 +136,6 @@ for teeth_num in tqdm(np.unique(helper)[1:]):
             output[output < THRESHOLD] = 0
 
             z_min, z_max, y_min, y_max, x_min, x_max = coords
-        
             canal_mask[z_min:z_max, y_min:y_max, x_min:x_max] = output
 
 canal_mask[helper == 0] = 0

@@ -122,5 +122,70 @@ def embed_in_center(small_volume: np.ndarray, big_volume_size: int, coords:bool 
         return big_volume, (start, end)
     else:
         return big_volume
+    
+import numpy as np
+from scipy.ndimage import (
+    generate_binary_structure,
+    binary_closing,
+    binary_opening,
+    binary_fill_holes,
+)
 
-        
+import numpy as np
+from scipy import ndimage as ndi
+
+def infill_label(
+    labels: np.ndarray,
+    target: int,
+    closing_iters: int = 4,
+    method: str = "closing",
+    background: int = 0,
+):
+    """
+    Fill every cavity that belongs to `target` inside a multi-label mask.
+
+    Parameters
+    ----------
+    labels : ndarray
+        Shape (Z, Y, X). Each voxel contains an integer class index.
+    target : int
+        The class to make solid.
+    closing_iters : int, default 2
+        Number of morphological-closing iterations (ignored if `method='flood'`).
+    method : {'closing', 'flood'}, default 'closing'
+        * 'closing'  – fast, seals small cracks first, then fills holes.
+        * 'flood'    – guaranteed watertight even with huge gaps, but slower.
+    background : int, default 0
+        The value that represents background / unlabeled voxels.
+
+    Returns
+    -------
+    solid : ndarray
+        Same shape & dtype as `labels`, but `target` is now solid.
+    """
+    solid = labels.copy()
+    mask = (labels == target)                      # binary view of the class
+    struct = ndi.generate_binary_structure(3, 1)   # 6-connected neighbourhood
+    struct = np.ones((3, 3, 3)) 
+
+    if method == "closing":
+        # 1) seal leaks • 2) fill enclosed cavities
+        closed  = ndi.binary_closing(mask, structure=struct,
+                                     iterations=closing_iters)
+        filled  = ndi.binary_fill_holes(closed)
+    elif method == "flood":
+        # “Exterior flood-fill” → always watertight
+        mask = np.pad(mask, 4, constant_values=0)
+        mask  = ndi.binary_closing(mask, structure=struct,
+                                     iterations=3)*1
+        mask = mask[4:-4, 4:-4, 4:-4]
+        padded  = np.pad(mask, 1, constant_values=1)
+        exterior = ndi.binary_fill_holes(padded[:, 1:-1, 1:-1])
+        filled   = exterior[1:-1]
+    else:
+        raise ValueError("method must be 'closing' or 'flood'")
+
+    # Add only the *new* interior voxels and only where background now
+    new_voxels = filled & (solid == background)
+    solid[new_voxels] = target
+    return solid
