@@ -34,7 +34,7 @@ def eval(number = 0):
     if DATA == "agh":
         file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
         helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-        ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
+        ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/15.nii.gz'
 
     elif DATA == "toothfairy":
         file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
@@ -65,9 +65,6 @@ def eval(number = 0):
         image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=10, input=1, coordss=True)
         gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=2, input=1, coordss=False)
         
-
-        if teeth_num == 15:
-            continue
 
         if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
             image_snip_2, cords_2 = embed_in_center(image_snipped, 96, coords=True)
@@ -171,5 +168,5 @@ def eval(number = 0):
 
 if __name__ == "__main__":
     
-    NUMBER = 9
+    NUMBER = 19
     eval(number=NUMBER)

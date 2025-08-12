@@ -75,7 +75,7 @@ def eval(number = 0):
 
             mask_temp = np.zeros(mask_snip_2.shape)
             mask_temp[mask_snip_2>0] = 1
-            #mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)
+            mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)*1
             
             masked = image_snip_2[mask_snip_2>0]
             masked_1 = image_snip_2[mask_temp>0]
@@ -117,7 +117,7 @@ def eval(number = 0):
 
                 mask_temp = np.zeros(mask_snip_12.shape)
                 mask_temp[mask_snip_12>0] = 1
-                #mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)
+                mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)*1
                 
                 masked = image_snip_12[mask_snip_12>0]
                 masked_1 = image_snip_12[mask_temp>0]
@@ -126,7 +126,7 @@ def eval(number = 0):
 
                 mask_temp = np.zeros(mask_snip_22.shape)
                 mask_temp[mask_snip_22>0] = 1
-                #mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)
+                mask_temp = binary_dilation(mask_temp, structure=np.ones((8, 8, 8)), iterations=1)*1
 
                 masked = image_snip_22[mask_snip_22>0]
                 masked_1 = image_snip_22[mask_temp>0]
@@ -165,6 +165,8 @@ def eval(number = 0):
                 canal_mask_temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
                 canal_mask[canal_mask_temp == 1] = 1
 
+    helper[helper>0] = 1
+    helper = binary_dilation(helper, structure=np.ones((8, 8, 8)), iterations=1)*1
     canal_mask[helper == 0] = 0
     nifti_img = sitk.GetImageFromArray(canal_mask.astype(np.uint8))
     original = sitk.ReadImage(helper_path)
@@ -185,5 +187,5 @@ def eval(number = 0):
 
 if __name__ == "__main__":
     
-    NUMBER = 10
+    NUMBER = 18
     eval(number=NUMBER)
