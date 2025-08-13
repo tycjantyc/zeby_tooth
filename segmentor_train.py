@@ -40,7 +40,6 @@ def main(data_path = 'D:/db1_v1.0',
     
     dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation,crop=crop, validation_split=0.05, validation_mode=False)
     dataset_val = AGH_Resize_Classes(data_directory=data_path, augmentation=False, crop=crop, validation_split=0.05, validation_mode=True)
-    
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
@@ -53,7 +52,7 @@ def main(data_path = 'D:/db1_v1.0',
 
     model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path=WEIGHT_FILE, freeze = freeze)
     #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
-    optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--channels', nargs='+', type=str, required=False)
     arg_parser.add_argument('--augmentation', required=False, default=False)
     arg_parser.add_argument('--crop', required=False, default=True)
-    arg_parser.add_argument('--pretrained', required=False, default=True)
+    arg_parser.add_argument('--pretrained', required=False, default=False)
     arg_parser.add_argument('--freeze', required=False, default=False)
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)

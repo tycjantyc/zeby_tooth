@@ -36,7 +36,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
             labels = np.unique(label_big)[1:]
 
             jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
-            trzonowe = (2 in labels and 18 in labels) or (15 in labels and 31 in labels)
+            trzonowe = ((2 in labels or 1 in labels) and (18 in labels or 17 in labels)) or ((15 in labels or 16 in labels) and (31 in labels or 32 in labels))
 
             if jedynki and trzonowe:
                 pass
@@ -96,7 +96,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
                 labels = np.unique(label_big)[1:]
 
                 jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
-                trzonowe = (2 in labels and 18 in labels) or (15 in labels and 31 in labels)
+                trzonowe = ((2 in labels or 1 in labels) and (18 in labels or 17 in labels)) or ((15 in labels or 16 in labels) and (31 in labels or 32 in labels))
 
                 if jedynki and trzonowe:
                     pass
