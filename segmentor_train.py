@@ -35,7 +35,7 @@ def main(data_path = 'D:/db1_v1.0',
     if prefetch_factor == 0:
         prefetch_factor = None
         
-    print(f"Learning parameters: \n Data path: {data_path}\n Batch size: {batch_size}\n Normalization: {normalization}\n Augmentation: {augmentation}\n Learning rate: {learning_rate}\n Weight decay: {weight_decay}\n Number of epochs: {num_epochs}\n Channels: {channels}\n Number of workers: {num_workers}")
+    print(f"Learning parameters: \n Data path: {data_path}\n Batch size: {batch_size}\n Normalization: {normalization}\n Augmentation: {augmentation}\n Learning rate: {learning_rate}\n Weight decay: {weight_decay}\n Number of epochs: {num_epochs}\n Channels: {channels}\n Number of workers: {num_workers}\n Pretrained: {pretrained}\n Freeze: {freeze}")
     norm_func = norm_factory(normalization)
     
     dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation,crop=crop, validation_split=0.05, validation_mode=False)

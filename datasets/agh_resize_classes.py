@@ -58,7 +58,7 @@ class AGH_Resize_Classes(Dataset):
 
         down = Resize(spatial_size = self.input_size, 
                       size_mode='all', 
-                      mode="trilinear", 
+                      mode="nearest-exact",     #previously "trilinear"
                       align_corners=None, 
                       anti_aliasing=True, 
                       anti_aliasing_sigma=None,
