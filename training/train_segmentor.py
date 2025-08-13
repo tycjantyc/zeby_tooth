@@ -33,7 +33,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
         #Training phase
         for step, (label_small, label_big) in enumerate(train_dataloader):
 
-            labels = np.unique(label_big)[1:]
+            labels = tc.unique(label_big)[1:]
 
             jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
             trzonowe = ((2 in labels or 1 in labels) and (18 in labels or 17 in labels)) or ((15 in labels or 16 in labels) and (31 in labels or 32 in labels))
@@ -56,7 +56,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
             clean_output = F.one_hot(label_big.long(), num_classes=34)  
             clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
     
-            clean_input = label_small.to(DEVICE)
+            clean_input = label_small.float().to(DEVICE)
             clean_output = clean_output.to(DEVICE)
 
             with accelerator.accumulate(model):
@@ -93,7 +93,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
         with tc.no_grad():
             for step, (label_small, label_big) in enumerate(val_dataloader):
 
-                labels = np.unique(label_big)[1:]
+                labels = tc.unique(label_big)[1:]
 
                 jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
                 trzonowe = ((2 in labels or 1 in labels) and (18 in labels or 17 in labels)) or ((15 in labels or 16 in labels) and (31 in labels or 32 in labels))
@@ -111,7 +111,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
                 clean_output = F.one_hot(label_big.long(), num_classes=34)
                 clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
                 
-                clean_input = label_small.to(DEVICE)
+                clean_input = label_small.float().to(DEVICE)
                 clean_output = clean_output.to(DEVICE)
 
                 with accelerator.accumulate(model):

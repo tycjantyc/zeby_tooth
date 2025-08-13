@@ -10,6 +10,8 @@ def build_class_segmentor_model(inchannels:int, outchannels:int, depths = [32, 6
         for param in model.encoders.parameters():
             param.requires_grad = False
 
+    print(weight_path)
+
     if (weight_path is not None) and (os.path.isfile(weight_path)):
         model.load_state_dict(load(weight_path, weights_only=True))
         print("Weights loaded!")

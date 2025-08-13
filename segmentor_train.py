@@ -50,6 +50,8 @@ def main(data_path = 'D:/db1_v1.0',
     else:
         WEIGHT_FILE = None
 
+    print(WEIGHT_FILE)
+
     model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path=WEIGHT_FILE, freeze = freeze)
     #model = build_hyspark_tooth_fairy_1(in_channel=inchannels, n_classes=34, freeze=False)
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
