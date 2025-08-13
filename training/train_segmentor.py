@@ -82,14 +82,27 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
 
             loss_full += loss.item()
 
-        loss_full = loss_full/len(train_dataloader)
+        loss_full = loss_full/(len(train_dataloader)-missed)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
         loss_val_full = 0
         print(f"Pominięte: {missed}")
 
+        missed = 0
+
         #Validation phase
         with tc.no_grad():
             for step, (label_small, label_big) in enumerate(val_dataloader):
+
+                labels = np.unique(label_big)[1:]
+
+                jedynki  = (8 in labels) or (9 in labels) or (24 in labels) or (25 in labels)
+                trzonowe = (2 in labels and 18 in labels) or (15 in labels and 31 in labels)
+
+                if jedynki and trzonowe:
+                    pass
+                else:
+                    missed += 1
+                    continue
                 
                 if (label_big < 0).any() or (label_big >= 34).any():
                     print("Invalid label found:")
@@ -109,7 +122,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
                 loss_val_full += loss.item()
 
         if len(val_dataloader) > 0:
-            loss_val_full = loss_val_full/len(val_dataloader)
+            loss_val_full = loss_val_full/(len(val_dataloader) - missed)
             print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
 
         if loss_val_full < global_loss:
