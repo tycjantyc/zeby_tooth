@@ -40,16 +40,17 @@ def main(data_path = 'D:/db1_v1.0',
     
     dataset_train = AGH_Resize_Classes(data_directory=data_path,augmentation=augmentation,crop=crop, validation_split=0.05, validation_mode=False)
     dataset_val = AGH_Resize_Classes(data_directory=data_path, augmentation=False, crop=crop, validation_split=0.05, validation_mode=True)
+
     train_dataloader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, prefetch_factor=prefetch_factor)
     val_dataloader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     inchannels = 1
 
+    WEIGHT_FILE = None
+
     if pretrained:
         WEIGHT_FILE = 'models/weights/agh_segmentor_best.pt'
-    else:
-        WEIGHT_FILE = None
-
+    
     print(WEIGHT_FILE)
 
     model = build_class_segmentor_model(inchannels=inchannels, outchannels=34, weight_path=WEIGHT_FILE, freeze = freeze)
