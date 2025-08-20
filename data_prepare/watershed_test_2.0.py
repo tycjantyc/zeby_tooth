@@ -172,9 +172,8 @@ def find_nearest_foreground_index(ws_arr: np.ndarray, idx_xyz: Tuple[int, int, i
 
 # ------------------------- main -------------------------
 
-def main(seed_mask, ws_mask, out, ws_big, seed_mode, fully_connected, no_snap, snap_radius):
+def main(seed_mask, ws_mask, out, ws_big=0, seed_mode="peak", fully_connected = True, no_snap = True, snap_radius = 6):
     
-
     seed_img = sitk.ReadImage(seed_mask)
     ws_img   = sitk.ReadImage(ws_mask)
 
