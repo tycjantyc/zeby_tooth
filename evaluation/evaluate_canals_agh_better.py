@@ -17,53 +17,56 @@ from monai.losses import DiceLoss
 from processing.utils import infill_label
 
 
-def eval(number = 0):
-    PATH = '../models/weights/tooth_fairy_3d_best_agh.pt'
-    PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-
-    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
-    model.eval()
-    model = model.cuda()
-
-    FILE = str(number)
+def eval(model, file_cbct, file_instance_seg, file_gt):
+    
+    # FILE = str(number)
     THRESHOLD = 0.5
     LOSS = DiceLoss(include_background=True, sigmoid=False)
-    DATA = "agh" 
-    #DATA = "toothfairy"
+    # DATA = "agh" 
+    # #DATA = "toothfairy"
 
-    if DATA == "agh":
-        file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
-        helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-        ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/15.nii.gz'
+    # if DATA == "agh":
+    #     file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
+    #     helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
+    #     #helper_path = '../data_prepare/test2.nii.gz'
+    #     ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
+    #     ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/10.nii.gz'
 
-    elif DATA == "toothfairy":
-        file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
-        helper_path = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
-        ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
+    # elif DATA == "toothfairy":
+    #     file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
+    #     helper_path = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
+    #     ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
+    #     ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
         
 
-    image = load_itk(file)
-    helper = load_itk(helper_path)
-    ground_truth = load_itk(ground_truth)
+    image = load_itk(file_cbct)
+    helper = load_itk(file_instance_seg)
+    ground_truth = load_itk(file_gt)
+
+    print(image.shape)
+    print(helper.shape)
 
     for teeth_num in tqdm(np.unique(helper)[1:]):
-        helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='flood')
+        helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
 
-    if DATA == "toothfairy":
-        helper = teeth_instance(helper)
-        ground_truth = only_canal_classes(ground_truth)
+    # if DATA == "toothfairy":
+    #     helper = teeth_instance(helper)
+    #     ground_truth = only_canal_classes(ground_truth)
 
     canal_mask = np.zeros(image.shape)
 
     for teeth_num in tqdm(np.unique(helper)[1:]):
+
+        if teeth_num == 24:
+            continue
 
         temp_mask = np.zeros(helper.shape)
 
         temp_mask[helper != teeth_num] = 0
         temp_mask[helper == teeth_num] = 1
 
-        image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=10, input=1, coordss=True)
-        gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=2, input=1, coordss=False)
+        image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=0, input=1, coordss=True)
+        gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=0, input=1, coordss=False)
         
 
         if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
@@ -167,6 +170,15 @@ def eval(number = 0):
     print(f"Dice score: {dice(canal_mask, ground_truth)}")
 
 if __name__ == "__main__":
+
+    PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
+    FILE = 25
     
-    NUMBER = 21
-    eval(number=NUMBER)
+    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
+    model.eval()
+    model = model.cuda()
+    
+    eval(model=model, 
+         file_cbct=f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
+         file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
+         file_gt=f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz')

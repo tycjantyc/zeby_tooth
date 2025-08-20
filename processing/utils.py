@@ -173,6 +173,12 @@ def infill_label(
         closed  = ndi.binary_closing(mask, structure=struct,
                                      iterations=closing_iters)
         filled  = ndi.binary_fill_holes(closed)
+
+    if method == "infill":
+            # 1) seal leaks • 2) fill enclosed cavities
+        
+            filled  = ndi.binary_fill_holes(mask*1)
+    
     elif method == "flood":
         # “Exterior flood-fill” → always watertight
         mask = np.pad(mask, 4, constant_values=0)
