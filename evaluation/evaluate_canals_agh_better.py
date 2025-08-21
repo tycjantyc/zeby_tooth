@@ -41,7 +41,8 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
 
     image = load_itk(file_cbct)
     helper = load_itk(file_instance_seg)
-    ground_truth = load_itk(file_gt)
+    if file_gt is not None:
+        ground_truth = load_itk(file_gt)
 
     print(image.shape)
     print(helper.shape)
@@ -66,13 +67,15 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
         temp_mask[helper == teeth_num] = 1
 
         image_snipped, mask_snipped, coords = crop_to_mask(image, temp_mask, padding=0, input=1, coordss=True)
-        gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=0, input=1, coordss=False)
+        if file_gt is not None:
+            gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=0, input=1, coordss=False)
         
 
         if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
             image_snip_2, cords_2 = embed_in_center(image_snipped, 96, coords=True)
             mask_snip_2 = embed_in_center(mask_snipped, 96, coords=False)
-            gt_snip_2 = embed_in_center(gt_snipped, 96, coords=False)
+            if file_gt is not None:
+                gt_snip_2 = embed_in_center(gt_snipped, 96, coords=False)
 
             masked = image_snip_2[mask_snip_2>0]
             image_snip_2[mask_snip_2>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
@@ -83,9 +86,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
             with tc.no_grad():
                 output = nn.Sigmoid()(model(image_snip_2))
 
-            dice_loss = LOSS(output, tc.tensor(gt_snip_2[None, None, ...], dtype=tc.float32).cuda())
-            
-            print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
+            if file_gt is not None:
+                dice_loss = LOSS(output, tc.tensor(gt_snip_2[None, None, ...], dtype=tc.float32).cuda()) 
+                print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
 
             start, end = cords_2
             output = output.detach().cpu().numpy()[0, 0, start[0]:end[0], start[1]:end[1], start[2]:end[2]]
@@ -108,8 +111,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
                 mask_snip_12 = embed_in_center(mask_snipped[:z_half], 96, coords=False)
                 mask_snip_22 = embed_in_center(mask_snipped[z_half:], 96, coords=False)
 
-                gt_snip_12 = embed_in_center(gt_snipped[:z_half], 96, coords=False)
-                gt_snip_22 = embed_in_center(gt_snipped[z_half:], 96, coords=False)
+                if file_gt is not None:
+                    gt_snip_12 = embed_in_center(gt_snipped[:z_half], 96, coords=False)
+                    gt_snip_22 = embed_in_center(gt_snipped[z_half:], 96, coords=False)
 
                 masked = image_snip_12[mask_snip_12>0]
                 image_snip_12[mask_snip_12>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
@@ -132,14 +136,16 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
                 with tc.no_grad():
                     pred1 = nn.Sigmoid()(model(image_snip_12))
                 
-                dice_loss = LOSS(pred1, tc.tensor(gt_snip_12[None, None, ...], dtype=tc.float32).cuda())
-                print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
+                if file_gt is not None:
+                    dice_loss = LOSS(pred1, tc.tensor(gt_snip_12[None, None, ...], dtype=tc.float32).cuda())
+                    print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
                 output[:z_half] = pred1.detach().cpu().numpy()[0, 0, start1[0]:end1[0], start1[1]:end1[1],start1[2]:end1[2]]
 
                 with tc.no_grad():
-                    pred2 = nn.Sigmoid()(model(image_snip_22))            
-                dice_loss = LOSS(pred2, tc.tensor(gt_snip_22[None, None, ...], dtype=tc.float32).cuda())
-                print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
+                    pred2 = nn.Sigmoid()(model(image_snip_22))  
+                if file_gt is not None:              
+                    dice_loss = LOSS(pred2, tc.tensor(gt_snip_22[None, None, ...], dtype=tc.float32).cuda())
+                    print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
                 output[z_half:] = pred2.detach().cpu().numpy()[0, 0, start2[0]:end2[0], start2[1]:end2[1],start2[2]:end2[2]]
                 
                 output[output > THRESHOLD] = 1
@@ -160,14 +166,15 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
     #     sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_tf_{FILE}.nii.gz')
     # else:
     sitk.WriteImage(nifti_img, out)
+    
+    if file_gt is not None:
+        def dice(mask1, mask2):
+            tp = np.count_nonzero((mask1+mask2) == 2)
+            fp = np.count_nonzero((mask1+mask2) == 1)
 
-    def dice(mask1, mask2):
-        tp = np.count_nonzero((mask1+mask2) == 2)
-        fp = np.count_nonzero((mask1+mask2) == 1)
+            return 2*tp/(2*tp+fp)
 
-        return 2*tp/(2*tp+fp)
-
-    print(f"Dice score: {dice(canal_mask, ground_truth)}")
+        print(f"Dice score: {dice(canal_mask, ground_truth)}")
 
 if __name__ == "__main__":
 

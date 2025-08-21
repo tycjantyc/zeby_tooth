@@ -19,17 +19,25 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
     LOSS = DiceLoss(include_background=False, reduction = 'none') 
     
     image = load_itk(file_semantic)
-    mask = load_itk(file_instance)
+    if file_instance is not None:
+        mask = load_itk(file_instance)
 
-    image, mask = np.flip(image, axis=(0, 2)), np.flip(mask, axis=(0, 2))
+    image = np.flip(image, axis=(0, 2))
+
+    if file_instance is not None:
+        mask = np.flip(mask, axis=(0, 2))
 
     # image = teeth_semantic(image)
     # mask = teeth_instance(mask)
-
-    image, mask, coords = crop_to_mask(image, mask, padding=2, coordss=True)
+    if file_instance is not None:
+        image, mask, coords = crop_to_mask(image, mask, padding=2, coordss=True)
+    else:
+        image, _, coords = crop_to_mask(image, image, padding=2, coordss=True)
 
     label_weak = image.astype(np.float32)
-    label = mask.astype(np.float32)
+
+    if file_instance is not None:
+        label = mask.astype(np.float32)
 
     print(label_weak.shape)
 
@@ -52,26 +60,30 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
                         lazy=False)
             
     label_weak = down.__call__(label_weak[None, ...])
-    label = down.__call__(label[None, ...])
+    if file_instance is not None:
+        label = down.__call__(label[None, ...])
     model = model.cuda()
 
     image = tc.tensor(label_weak[None, ...], dtype=tc.float32).cuda()
-    label = tc.tensor(label, dtype=tc.float32).cuda()
+    if file_instance is not None:
+        label = tc.tensor(label, dtype=tc.float32).cuda()
 
     output = nn.Softmax(dim=1)(model(image))
 
-    clean_output = F.one_hot(label.long(), num_classes=34)
-    clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
 
-    print(LOSS(output, clean_output))
-    #print(f"Dice score: {1 - LOSS(output, clean_output).item()}")
+    if file_instance is not None:
+        clean_output = F.one_hot(label.long(), num_classes=34)
+        clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
+
+        print(LOSS(output, clean_output))
+        print(f"Dice score: {1 - LOSS(output, clean_output).item()}")
 
     output = tc.argmax(output, dim=1)
     output = output[0].detach().cpu().numpy().astype(np.uint8)
     print(output.shape)
 
     output = up.__call__(output[None, ...])[0]
-    temp = np.zeros(load_itk(file_instance).shape)
+    temp = np.zeros(load_itk(file_semantic).shape)
     z_min, z_max, y_min, y_max, x_min, x_max = coords
     temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
     output = temp
