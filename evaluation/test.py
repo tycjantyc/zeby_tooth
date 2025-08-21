@@ -15,7 +15,7 @@ from evaluation.evaluate_agh_segmentor import evaluate_agh
 from monai.losses import DiceLoss
 import torch.nn.functional as F
 
-def instance_teeth_segment(model, file_semantic, file_instance):
+def instance_teeth_segment(model, file_semantic, file_instance, out):
     LOSS = DiceLoss(include_background=False, reduction = 'none') 
     
     image = load_itk(file_semantic)
@@ -80,11 +80,11 @@ def instance_teeth_segment(model, file_semantic, file_instance):
     original = sitk.ReadImage(file_semantic)
     nifti_img = sitk.GetImageFromArray(np.flip(output, axis = (0, 2)))
     nifti_img.CopyInformation(original)
-    sitk.WriteImage(nifti_img, '../evaluation/evaluation_results/output_image_2.nii.gz')
-    nifti_img2 = nib.Nifti1Image(label[0].detach().cpu().numpy().astype(np.uint8), affine)
-    nib.save(nifti_img2, '../evaluation/evaluation_results/output_image_2_mask.nii.gz')
-    nifti_img3 = nib.Nifti1Image(label_weak[0].numpy().astype(np.uint8), affine)
-    nib.save(nifti_img3, '../evaluation/evaluation_results/output_image_2_01.nii.gz')
+    sitk.WriteImage(nifti_img, out)
+    # nifti_img2 = nib.Nifti1Image(label[0].detach().cpu().numpy().astype(np.uint8), affine)
+    # nib.save(nifti_img2, '../evaluation/evaluation_results/output_image_2_mask.nii.gz')
+    # nifti_img3 = nib.Nifti1Image(label_weak[0].numpy().astype(np.uint8), affine)
+    # nib.save(nifti_img3, '../evaluation/evaluation_results/output_image_2_01.nii.gz')
 
 if __name__ == "__main__":
     model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     file_semantic = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/16.nii.gz'
     file_instance = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/16.nii.gz'
+    out = '../evaluation/evaluation_results/output_image_2.nii.gz'
 
-    instance_teeth_segment(model, file_semantic, file_instance)
-
+    instance_teeth_segment(model, file_semantic, file_instance, out)
 

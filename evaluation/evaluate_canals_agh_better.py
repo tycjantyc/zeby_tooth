@@ -17,7 +17,7 @@ from monai.losses import DiceLoss
 from processing.utils import infill_label
 
 
-def eval(model, file_cbct, file_instance_seg, file_gt):
+def eval(model, file_cbct, file_instance_seg, file_gt, out):
     
     # FILE = str(number)
     THRESHOLD = 0.5
@@ -153,13 +153,13 @@ def eval(model, file_cbct, file_instance_seg, file_gt):
 
     canal_mask[helper == 0] = 0
     nifti_img = sitk.GetImageFromArray(canal_mask.astype(np.uint8))
-    original = sitk.ReadImage(helper_path)
+    original = sitk.ReadImage(file_instance_seg)
     nifti_img.CopyInformation(original)
 
-    if DATA == "toothfairy":
-        sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_tf_{FILE}.nii.gz')
-    else:
-        sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_{FILE}_test.nii.gz')
+    # if DATA == "toothfairy":
+    #     sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_tf_{FILE}.nii.gz')
+    # else:
+    sitk.WriteImage(nifti_img, out)
 
     def dice(mask1, mask2):
         tp = np.count_nonzero((mask1+mask2) == 2)
@@ -181,4 +181,5 @@ if __name__ == "__main__":
     eval(model=model, 
          file_cbct=f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
          file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
-         file_gt=f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz')
+         file_gt=f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz', 
+         out = f'../evaluation/evaluation_results/output_canals_mask_{FILE}_test.nii.gz')
