@@ -4,7 +4,7 @@ from diffusers.optimization import get_cosine_schedule_with_warmup
 from datasets.agh_resize_classes import AGH_Resize_Classes
 from models.class_segmentor_model import build_class_segmentor_model
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
-from training.train_segmentor import train_segmentor
+from training.train_segmentor_hungarian import train_segmentor
 from processing.utils import norm_factory
 import argparse
 

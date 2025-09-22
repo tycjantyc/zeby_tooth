@@ -179,14 +179,18 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 25
+    FILE = 32
     
-    model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
-    model.eval()
-    model = model.cuda()
-    
-    eval(model=model, 
-         file_cbct=f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
-         file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
-         file_gt=f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz', 
-         out = f'../evaluation/evaluation_results/output_canals_mask_{FILE}_test.nii.gz')
+    for i in range(10):
+        
+        model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
+        model.eval()
+        model = model.cuda()
+        
+        eval(model=model, 
+            file_cbct=f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
+            file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
+            file_gt=None, #f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/10.nii.gz', 
+            out = f'../evaluation/evaluation_results/output_canals_mask_{FILE}_test.nii.gz')
+        
+        FILE += 1
