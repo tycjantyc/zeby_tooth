@@ -47,8 +47,8 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
     print(image.shape)
     print(helper.shape)
 
-    for teeth_num in tqdm(np.unique(helper)[1:]):
-        helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
+    #for teeth_num in tqdm(np.unique(helper)[1:]):
+    #    helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
 
     # if DATA == "toothfairy":
     #     helper = teeth_instance(helper)
@@ -179,9 +179,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 32
+    FILE = 35
     
-    for i in range(10):
+    for i in range(1):
         
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
         model.eval()
@@ -189,7 +189,8 @@ if __name__ == "__main__":
         
         eval(model=model, 
             file_cbct=f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
-            file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
+            #file_instance_seg = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
+            file_instance_seg = f'C:/Users/Jan/Downloads/{FILE}.nii.gz',
             file_gt=None, #f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/10.nii.gz', 
             out = f'../evaluation/evaluation_results/output_canals_mask_{FILE}_test.nii.gz')
         
