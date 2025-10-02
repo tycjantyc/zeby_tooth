@@ -52,4 +52,4 @@ if __name__ == "__main__":
 
     affine = np.eye(4)
     nifti_img = nib.Nifti1Image(segmented_volume, affine)
-    nib.save(nifti_img, 'evaluation/evaluation_results/output_image.nii.gz')
+    nib.save(nifti_img, 'evaluation/evaluation_results/hungarian.nii.gz')

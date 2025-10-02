@@ -100,11 +100,12 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
 
 if __name__ == "__main__":
     model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
-    model.load_state_dict(tc.load('../models/weights/agh_segmentor_best_2.pt', weights_only=True))
+    #model.load_state_dict(tc.load('../models/weights/agh_segmentor_best_2.pt', weights_only=True))
+    model.load_state_dict(tc.load("C:/Users/Jan/Desktop/weights_tooth_fairy/agh_segmentor_best_hung_2.pt", weights_only=True))
 
-    file_semantic = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/16.nii.gz'
-    file_instance = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/16.nii.gz'
-    out = '../evaluation/evaluation_results/output_image_2.nii.gz'
+    file_semantic = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/17.nii.gz'
+    file_instance = None #'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/17.nii.gz'
+    out = '../evaluation/evaluation_results/hungarian.nii.gz'
 
     instance_teeth_segment(model, file_semantic, file_instance, out)
 
