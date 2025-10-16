@@ -17,7 +17,7 @@ from monai.losses import DiceLoss
 from processing.utils import infill_label
 
 
-def eval(model, file_cbct, file_instance_seg, file_gt, out):
+def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
     
     # FILE = str(number)
     THRESHOLD = 0.5
@@ -47,8 +47,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out):
     print(image.shape)
     print(helper.shape)
 
-    #for teeth_num in tqdm(np.unique(helper)[1:]):
-    #    helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
+    if infill:
+        for teeth_num in tqdm(np.unique(helper)[1:]):
+            helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
 
     # if DATA == "toothfairy":
     #     helper = teeth_instance(helper)
