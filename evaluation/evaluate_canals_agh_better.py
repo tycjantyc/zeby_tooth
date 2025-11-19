@@ -17,28 +17,32 @@ from monai.losses import DiceLoss
 from processing.utils import infill_label
 
 
+def sliding_window_slices(size: int, window: int, stride: int) -> list[tuple[int, int]]:
+    if size <= window:
+        return [(0, size)]
+
+    slices = []
+    start = 0
+    while True:
+        end = start + window
+        if end >= size:
+            slices.append((size - window, size))
+            break
+        slices.append((start, end))
+        start += stride
+
+    deduped = []
+    for rng in slices:
+        if not deduped or deduped[-1] != rng:
+            deduped.append(rng)
+    return deduped
+
+
 def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
     
-    # FILE = str(number)
     THRESHOLD = 0.5
     LOSS = DiceLoss(include_background=True, sigmoid=False)
-    # DATA = "agh" 
-    # #DATA = "toothfairy"
-
-    # if DATA == "agh":
-    #     file = f'D:/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz'
-    #     helper_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz'
-    #     #helper_path = '../data_prepare/test2.nii.gz'
-    #     ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/{FILE}.nii.gz'
-    #     ground_truth = f'D:/db1_v1.0/db1_v1.0_nifti_root_canal_masks_single_cls_ref/10.nii.gz'
-
-    # elif DATA == "toothfairy":
-    #     file = f'D:/ToothFairy3/imagesTr/ToothFairy3F_{int(FILE):03}_0000.nii.gz'
-    #     helper_path = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
-    #     ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
-    #     ground_truth = f'D:/ToothFairy3/labelsTr/ToothFairy3F_{int(FILE):03}.nii.gz'
-        
-
+    
     image = load_itk(file_cbct)
     helper = load_itk(file_instance_seg)
     if file_gt is not None:
@@ -51,16 +55,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
         for teeth_num in tqdm(np.unique(helper)[1:]):
             helper = infill_label(helper, target=teeth_num, closing_iters=4, background=0, method='infill')
 
-    # if DATA == "toothfairy":
-    #     helper = teeth_instance(helper)
-    #     ground_truth = only_canal_classes(ground_truth)
-
     canal_mask = np.zeros(image.shape)
 
     for teeth_num in tqdm(np.unique(helper)[1:]):
-
-        if teeth_num == 24:
-            continue
 
         temp_mask = np.zeros(helper.shape)
 
@@ -72,100 +69,74 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
             gt_snipped, _= crop_to_mask(ground_truth, temp_mask, padding=0, input=1, coordss=False)
         
 
-        if ((image_snipped.shape[0] < 96) and (image_snipped.shape[1] < 96) and (image_snipped.shape[2] < 96)): 
-            image_snip_2, cords_2 = embed_in_center(image_snipped, 96, coords=True)
-            mask_snip_2 = embed_in_center(mask_snipped, 96, coords=False)
-            if file_gt is not None:
-                gt_snip_2 = embed_in_center(gt_snipped, 96, coords=False)
+        TILE_SIZE = 96
+        TILE_STRIDE = TILE_SIZE // 2
 
-            masked = image_snip_2[mask_snip_2>0]
-            image_snip_2[mask_snip_2>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
-            image_snip_2[mask_snip_2<1] = 0 
+        agg_prediction = np.zeros_like(image_snipped, dtype=np.float32)
+        agg_counts = np.zeros_like(image_snipped, dtype=np.float32)
 
-            image_snip_2 = tc.tensor(image_snip_2[None, None, ...], dtype = tc.float32).cuda()
-            
-            with tc.no_grad():
-                output = nn.Sigmoid()(model(image_snip_2))
+        z_slices = sliding_window_slices(image_snipped.shape[0], TILE_SIZE, TILE_STRIDE)
+        y_slices = sliding_window_slices(image_snipped.shape[1], TILE_SIZE, TILE_STRIDE)
+        x_slices = sliding_window_slices(image_snipped.shape[2], TILE_SIZE, TILE_STRIDE)
 
-            if file_gt is not None:
-                dice_loss = LOSS(output, tc.tensor(gt_snip_2[None, None, ...], dtype=tc.float32).cuda()) 
-                print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
+        for z_start, z_end in z_slices:
+            for y_start, y_end in y_slices:
+                for x_start, x_end in x_slices:
+                    image_tile = image_snipped[z_start:z_end, y_start:y_end, x_start:x_end]
+                    mask_tile = mask_snipped[z_start:z_end, y_start:y_end, x_start:x_end]
 
-            start, end = cords_2
-            output = output.detach().cpu().numpy()[0, 0, start[0]:end[0], start[1]:end[1], start[2]:end[2]]
-            output[output > THRESHOLD] = 1
-            output[output < THRESHOLD] = 0
+                    image_tile_embed, embed_coords = embed_in_center(image_tile, TILE_SIZE, coords=True)
+                    mask_tile_embed = embed_in_center(mask_tile, TILE_SIZE, coords=False)
 
-            z_min, z_max, y_min, y_max, x_min, x_max = coords
+                    masked = image_tile_embed[mask_tile_embed > 0]
+                    if masked.size > 0:
+                        image_tile_embed[mask_tile_embed > 0] = (masked - masked.min()) / (masked.max() - masked.min() + 1e-5)
+                    image_tile_embed[mask_tile_embed < 1] = 0
 
-            canal_mask_temp = np.zeros(canal_mask.shape)
-            canal_mask_temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
-            canal_mask[canal_mask_temp == 1] = 1
-            del output
-            tc.cuda.empty_cache()
-        
-        else:   
-                z_half = image_snipped.shape[0]//2
-                image_snip_12, cords_1 = embed_in_center(image_snipped[:z_half], 96, coords=True)
-                image_snip_22, cords_2 = embed_in_center(image_snipped[z_half:], 96, coords=True)
-                
-                mask_snip_12 = embed_in_center(mask_snipped[:z_half], 96, coords=False)
-                mask_snip_22 = embed_in_center(mask_snipped[z_half:], 96, coords=False)
+                    tile_tensor = tc.tensor(image_tile_embed[None, None, ...], dtype=tc.float32).cuda()
 
-                if file_gt is not None:
-                    gt_snip_12 = embed_in_center(gt_snipped[:z_half], 96, coords=False)
-                    gt_snip_22 = embed_in_center(gt_snipped[z_half:], 96, coords=False)
+                    with tc.no_grad():
+                        pred_tile = nn.Sigmoid()(model(tile_tensor))
 
-                masked = image_snip_12[mask_snip_12>0]
-                image_snip_12[mask_snip_12>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
-                image_snip_12[mask_snip_12<1] = 0 
+                    if file_gt is not None:
+                        gt_tile = gt_snipped[z_start:z_end, y_start:y_end, x_start:x_end]
+                        gt_tile_embed = embed_in_center(gt_tile, TILE_SIZE, coords=False)
+                        gt_tile_tensor = tc.tensor(gt_tile_embed[None, None, ...], dtype=tc.float32).cuda()
+                        dice_loss = LOSS(pred_tile, gt_tile_tensor)
+                        print(f"Teeth number {teeth_num} chunk ({z_start}:{z_end}, {y_start}:{y_end}, {x_start}:{x_end}) - Dice loss: {dice_loss.item()}")
 
-                masked = image_snip_22[mask_snip_22>0]
-                image_snip_22[mask_snip_22>0] = (masked - masked.min())/(masked.max() - masked.min() + 1e-5)
-                image_snip_22[mask_snip_22<1] = 0 
+                    start, end = embed_coords
+                    pred_tile_np = pred_tile.detach().cpu().numpy()[0, 0]
+                    pred_tile_np = pred_tile_np[start[0]:end[0], start[1]:end[1], start[2]:end[2]]
 
-                output = image_snipped.copy()
+                    agg_prediction[z_start:z_end, y_start:y_end, x_start:x_end] += pred_tile_np
+                    agg_counts[z_start:z_end, y_start:y_end, x_start:x_end] += 1
 
-                image_snip_12 = tc.tensor(image_snip_12, dtype = tc.float32).cuda()
-                image_snip_12 = image_snip_12[None, None, ...]
+        aggregated_output = np.zeros_like(agg_prediction, dtype=np.float32)
+        nonzero = agg_counts > 0
+        aggregated_output[nonzero] = agg_prediction[nonzero] / agg_counts[nonzero]
 
-                image_snip_22 = tc.tensor(image_snip_22, dtype = tc.float32).cuda()
-                image_snip_22 = image_snip_22[None, None, ...]
+        if file_gt is not None:
+            dice_loss = LOSS(tc.tensor(aggregated_output[None, None, ...], dtype=tc.float32).cuda(),
+                             tc.tensor(gt_snipped[None, None, ...], dtype=tc.float32).cuda())
+            print(f"Teeth number {teeth_num} - Aggregated Dice loss: {dice_loss.item()}")
 
-                start1, end1 = cords_1
-                start2, end2 = cords_2
-                with tc.no_grad():
-                    pred1 = nn.Sigmoid()(model(image_snip_12))
-                
-                if file_gt is not None:
-                    dice_loss = LOSS(pred1, tc.tensor(gt_snip_12[None, None, ...], dtype=tc.float32).cuda())
-                    print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
-                output[:z_half] = pred1.detach().cpu().numpy()[0, 0, start1[0]:end1[0], start1[1]:end1[1],start1[2]:end1[2]]
+        output = np.zeros_like(aggregated_output, dtype=np.uint8)
+        output[aggregated_output > THRESHOLD] = 1
 
-                with tc.no_grad():
-                    pred2 = nn.Sigmoid()(model(image_snip_22))  
-                if file_gt is not None:              
-                    dice_loss = LOSS(pred2, tc.tensor(gt_snip_22[None, None, ...], dtype=tc.float32).cuda())
-                    print(f"Teeth number {teeth_num} - Dice loss: {dice_loss.item()}")
-                output[z_half:] = pred2.detach().cpu().numpy()[0, 0, start2[0]:end2[0], start2[1]:end2[1],start2[2]:end2[2]]
-                
-                output[output > THRESHOLD] = 1
-                output[output < THRESHOLD] = 0
+        z_min, z_max, y_min, y_max, x_min, x_max = coords
 
-                z_min, z_max, y_min, y_max, x_min, x_max = coords
+        canal_mask_temp = np.zeros(canal_mask.shape)
+        canal_mask_temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
+        canal_mask[canal_mask_temp == 1] = 1
 
-                canal_mask_temp = np.zeros(canal_mask.shape)
-                canal_mask_temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
-                canal_mask[canal_mask_temp == 1] = 1
+        tc.cuda.empty_cache()
 
     canal_mask[helper == 0] = 0
     nifti_img = sitk.GetImageFromArray(canal_mask.astype(np.uint8))
     original = sitk.ReadImage(file_instance_seg)
     nifti_img.CopyInformation(original)
 
-    # if DATA == "toothfairy":
-    #     sitk.WriteImage(nifti_img, f'../evaluation/evaluation_results/output_canals_mask_tf_{FILE}.nii.gz')
-    # else:
     sitk.WriteImage(nifti_img, out)
     
     if file_gt is not None:
@@ -180,9 +151,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 39
+    FILE = 20
     
-    for i in range(10):
+    for i in range(1):
         
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
         model.eval()
