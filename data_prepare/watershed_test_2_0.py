@@ -179,6 +179,8 @@ def main(seed_mask, ws_mask, out, ws_big=0, seed_mode="peak", fully_connected = 
 
     # Foreground (tooth) mask for watershed image
     ws_arr = sitk.GetArrayFromImage(ws_img)  # (z,y,x)
+
+    print(ws_arr.shape)
     ws_fg = (ws_arr != ws_big)
 
     # Collect labels from seed image (ignore background)
@@ -243,22 +245,68 @@ def main(seed_mask, ws_mask, out, ws_big=0, seed_mode="peak", fully_connected = 
     sitk.WriteImage(ws_labels, out)
     print(f"Saved watershed labels to: {out}")
 
+def compute_multiclass_dice_from_paths(
+    pred_path: str,
+    target_path: str,
+    num_classes: int = 33,
+    background_label: int = 0,
+) -> Tuple[float, float]:
+    pred_img = sitk.ReadImage(pred_path)
+    target_img = sitk.ReadImage(target_path)
+    pred_arr = sitk.GetArrayFromImage(pred_img)
+    target_arr = sitk.GetArrayFromImage(target_img)
+
+    numerator = 0.0
+    denominator = 0.0
+
+    for label in range(num_classes + 1):
+        if label == background_label:
+            continue
+        pred_mask = pred_arr == label
+        target_mask = target_arr == label
+        intersection = np.logical_and(pred_mask, target_mask).sum()
+        pred_voxels = pred_mask.sum()
+        target_voxels = target_mask.sum()
+        numerator += 2.0 * intersection
+        denominator += pred_voxels + target_voxels
+
+    dice = (numerator / denominator) if denominator else 1.0
+    return dice, 1.0 - dice
+
+
 if __name__ == "__main__":
 
-    ap = argparse.ArgumentParser(description="3D watershed with centers from one image and flooding on another.")
-    ap.add_argument("--seed-mask", required=True, help="Path to input multi-class label NIfTI for center extraction.")
-    ap.add_argument("--ws-mask",   required=True, help="Path to semantic (teeth) mask NIfTI for watershed.")
-    ap.add_argument("--out",       required=True, help="Path to output NIfTI.")
-    ap.add_argument("--ws-bg",   type=int, default=0, help="Background value in ws-mask (non-foreground). Default: 0")
-    ap.add_argument("--seed-mode", choices=["peak", "centroid"], default="peak",
-                    help="Seed type per label from seed-mask: 'peak' (DT maximum within label) or 'centroid'. Default: peak")
-    ap.add_argument("--fully-connected", action="store_true",
-                    help="Use 26-connectivity in 3D for watershed.")
-    ap.add_argument("--no-snap", action="store_true",
-                    help="Disable snapping seeds that fall on ws-bg to nearest foreground.")
-    ap.add_argument("--snap-radius", type=int, default=6,
-                    help="Max search radius (voxels) when snapping seeds to ws foreground (if needed). Default: 6")
-    args = ap.parse_args()
+    # ap = argparse.ArgumentParser(description="3D watershed with centers from one image and flooding on another.")
+    # ap.add_argument("--seed-mask", required=True, help="Path to input multi-class label NIfTI for center extraction.")
+    # ap.add_argument("--ws-mask",   required=True, help="Path to semantic (teeth) mask NIfTI for watershed.")
+    # ap.add_argument("--out",       required=True, help="Path to output NIfTI.")
+    # ap.add_argument("--ws-bg",   type=int, default=0, help="Background value in ws-mask (non-foreground). Default: 0")
+    # ap.add_argument("--seed-mode", choices=["peak", "centroid"], default="peak",
+    #                 help="Seed type per label from seed-mask: 'peak' (DT maximum within label) or 'centroid'. Default: peak")
+    # ap.add_argument("--fully-connected", action="store_true",
+    #                 help="Use 26-connectivity in 3D for watershed.")
+    # ap.add_argument("--no-snap", action="store_true",
+    #                 help="Disable snapping seeds that fall on ws-bg to nearest foreground.")
+    # ap.add_argument("--snap-radius", type=int, default=6,
+    #                 help="Max search radius (voxels) when snapping seeds to ws foreground (if needed). Default: 6")
+    # args = ap.parse_args()
+    # main(args.seed_mask, args.ws_mask, args.out, args.ws_big, args.seed_mode, args.fully_connected, args.no_snap, args.snap_radius)
 
+      # TODO: set path to ground-truth mask for Dice evaluation
 
-    main(args.seed_mask, args.ws_mask, args.out, args.ws_big, args.seed_mode, args.fully_connected, args.no_snap, args.snap_radius)
+    for i in range(1,6):
+        NUM = i
+        seed_mask=f'../evaluation/evaluation_results/ok_{NUM}.nii.gz'
+        ws_mask = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/{NUM}.nii.gz'
+        out = f"../evaluation/evaluation_results/watershed_{NUM}.nii.gz"
+        main(seed_mask, ws_mask, out)
+
+        reference_mask_path = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{NUM}.nii.gz'
+
+        if reference_mask_path:
+            dice_score, dice_loss = compute_multiclass_dice_from_paths(out, reference_mask_path)
+            print(f"Dice score for case {NUM}: {dice_score:.4f} (loss: {dice_loss:.4f})")
+        else:
+            print("Reference mask path is empty; skipping Dice computation.")
+            
+        
