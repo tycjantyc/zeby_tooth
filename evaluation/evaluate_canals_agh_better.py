@@ -143,7 +143,6 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
         def dice(mask1, mask2):
             tp = np.count_nonzero((mask1+mask2) == 2)
             fp = np.count_nonzero((mask1+mask2) == 1)
-
             return 2*tp/(2*tp+fp)
 
         print(f"Dice score: {dice(canal_mask, ground_truth)}")
@@ -151,9 +150,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 14
+    FILE = 45
     
-    for i in range(1):
+    for i in range(10):
         
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
         model.eval()
