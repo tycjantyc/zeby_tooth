@@ -1,12 +1,13 @@
 from evaluation.evaluate_canals_agh_better import eval
 from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 import argparse
+from tqdm import tqdm
 
 def main(data_path, file_from, num_files):
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
     FILE = file_from    
 
-    for i in range(num_files):
+    for i in tqdm(range(num_files)):
         
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
         model.eval()
