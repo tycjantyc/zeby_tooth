@@ -24,8 +24,8 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
     path_labels = os.path.join(data_dir, 'db1_v1.0_nifti_root_canal_masks_single_cls_ref')
 
     paths_images = [os.path.join(path_images, i, 'image.nii.gz') for i in sorted(os.listdir(path_images), key=lambda x: int(x)) if not int(i) in test_canals and int(i) != 0]
-    paths_helpers = [os.path.join(path_helper, i) for i in sorted(os.listdir(path_helper), key=lambda x: int(x.split('.')[0])) if not int(i) in test_canals]
-    paths_labels = [os.path.join(path_labels, i) for i in sorted(os.listdir(path_labels), key=lambda x: int(x.split('.')[0])) if not int(i) in test_canals]
+    paths_helpers = [os.path.join(path_helper, i) for i in sorted(os.listdir(path_helper), key=lambda x: int(x.split('.')[0])) if not int(i.split('.')[0]) in test_canals]
+    paths_labels = [os.path.join(path_labels, i) for i in sorted(os.listdir(path_labels), key=lambda x: int(x.split('.')[0])) if not int(i.split('.')[0]) in test_canals]
 
     paths_images = paths_images[:len(path_labels)]
     paths_helpers = paths_helpers[: len(path_labels)]
