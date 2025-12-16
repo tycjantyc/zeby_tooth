@@ -7,7 +7,7 @@ from torch import load
 from tqdm import tqdm
 
 def main(data_path, file_from, num_files):
-    PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
+
     FILE = file_from    
     model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
     model.load_state_dict(load('../models/weights/agh_segmentor_best_2.pt', weights_only=True))
@@ -15,13 +15,16 @@ def main(data_path, file_from, num_files):
     model = model.cuda()
 
     for i in tqdm(range(num_files)):
-          
-        eval(model=model, 
-            file_cbct=f'{data_path}/db1_v1.0/db1_v1.0_nifti/{FILE}/image.nii.gz', 
-            file_instance_seg = f'{data_path}/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{FILE}.nii.gz',
-            file_gt=None,
-            out = f'../evaluation/eval_results_jenkins/pred_canal_mask_{FILE}.nii.gz')
-        
+
+        file_semantic = f'{data_path}/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/{i}.nii.gz'
+        file_instance = f'{data_path}/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{i}.nii.gz'
+        helper = f'evaluation/eval_results_jenkins/pred_teeth_helper_mask_{i}.nii.gz'
+        out = f'evaluation/eval_results_jenkins/pred_teeth_mask_{i}.nii.gz'
+
+        instance_teeth_segment(model, file_semantic, file_instance, helper)
+
+        main_watershed(seed_mask=helper, ws_mask=file_semantic, out=out)
+
         FILE += 1
     pass
 
