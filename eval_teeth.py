@@ -9,7 +9,7 @@ import numpy as np
 
 def dice_score_multiclass(y_true, y_pred, ignore_background=True, eps=1e-6):
 
-    classes = list(set(np.unique(y_true)) + np.unique(y_pred))
+    classes = list(set(np.unique(y_true) + np.unique(y_pred)))
     if ignore_background:
         classes.remove(0)
    
