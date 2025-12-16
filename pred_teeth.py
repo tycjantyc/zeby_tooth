@@ -16,6 +16,8 @@ def main(data_path, file_from, num_files):
 
     for i in tqdm(range(num_files)):
 
+        i = i+FILE
+
         file_semantic = f'{data_path}/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/{i}.nii.gz'
         file_instance = f'{data_path}/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{i}.nii.gz'
         helper = f'evaluation/eval_results_jenkins/pred_teeth_helper_mask_{i}.nii.gz'
