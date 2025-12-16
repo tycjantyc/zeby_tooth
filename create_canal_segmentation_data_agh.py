@@ -30,6 +30,10 @@ def create_canal_data_agh(data_dir = 'D:/db1_v1.0', padding = 4, input_size = 64
     paths_images = paths_images[:len(path_labels)]
     paths_helpers = paths_helpers[: len(path_labels)]
 
+    print(paths_images)
+    print(paths_helpers)
+    print(paths_labels)
+
     if os.path.isdir('data'):
         pass
     else:
