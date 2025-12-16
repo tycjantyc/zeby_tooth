@@ -4,12 +4,35 @@ import argparse
 import os
 import numpy as np
 from processing.utils import load_itk
+from monai.losses import DiceLoss
+import numpy as np
 
+def dice_score_multiclass(y_true, y_pred, ignore_background=True, eps=1e-6):
 
-def dice(mask1, mask2):
-    tp = np.count_nonzero((mask1+mask2) == 2)
-    fp = np.count_nonzero((mask1+mask2) == 1)
-    return 2*tp/(2*tp+fp)
+    classes = list(set(np.unique(y_true)) + np.unique(y_pred))
+    if ignore_background:
+        classes.remove(0)
+   
+    dice_per_class = {}
+
+    for cls in classes:
+        y_true_cls = (y_true == cls)
+        y_pred_cls = (y_pred == cls)
+
+        intersection = np.sum(y_true_cls & y_pred_cls)
+        union = np.sum(y_true_cls) + np.sum(y_pred_cls)
+
+        if union == 0:
+            dice = 1.0
+        else:
+            dice = (2.0 * intersection + eps) / (union + eps)
+
+        dice_per_class[cls] = dice
+
+    mean_dice = np.mean(list(dice_per_class.values()))
+
+    return mean_dice, dice_per_class
+
 
 def num_extractor_help(path):
     return int(path.split('_')[-1].split('.')[0])

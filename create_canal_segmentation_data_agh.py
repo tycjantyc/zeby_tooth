@@ -11,7 +11,6 @@ def load_index_json(file_path):
         data = json.load(f)
 
     test_canals = [int(x) for x in data["test_canals"]]
-
     return test_canals
 
 
