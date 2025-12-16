@@ -21,6 +21,9 @@ def main(data_path):
 
     for i in os.listdir(pred_path):
 
+        if i.startswith('.'):
+            continue
+
         pred_path_canal = os.path.join(pred_path, i)
         gt_path_canal = os.path.join(data_path, 'db1_v1.0','db1_v1.0_nifti_root_canal_masks_single_cls_ref',f'{num_extractor_help(pred_path_canal)}.nii.gz')
         
