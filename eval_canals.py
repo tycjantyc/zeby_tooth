@@ -3,6 +3,8 @@ from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 import argparse
 import os
 import numpy as np
+from processing.utils import load_itk
+
 
 def dice(mask1, mask2):
     tp = np.count_nonzero((mask1+mask2) == 2)
@@ -22,7 +24,9 @@ def main(data_path):
         pred_path_canal = os.path.join(pred_path, i)
         gt_path_canal = os.path.join(data_path, 'db1_v1.0','db1_v1.0_nifti_root_canal_masks_single_cls_ref',f'{num_extractor_help(pred_path_canal)}.nii.gz')
         
-        dice_score = dice(pred_path_canal, gt_path_canal)
+        print(gt_path_canal)
+
+        dice_score = dice(load_itk(pred_path_canal), load_itk(gt_path_canal))
         dice_scores.append(dice_score)
         print(f"Dice score: {dice_score}")
 
