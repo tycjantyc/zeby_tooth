@@ -150,9 +150,9 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill=False):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 45
+    FILE = 69
     
-    for i in range(10):
+    for i in range(1):
         
         model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=1, img_size=96, freeze=False, weight_path=PATH1)
         model.eval()

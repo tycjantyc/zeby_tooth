@@ -32,11 +32,9 @@ def main(data_path):
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--data_path', type=str, required=False, default='D:/ToothFairy3')
-    arg_parser.add_argument('--file_from', type=int, required=False, default=10)
-    arg_parser.add_argument('--num_files', type=float, required=False, default=1e-4)
     
     args = arg_parser.parse_args()
 
-    main(args.data_path, args.file_from, args.num_files)
+    main(args.data_path)
 
     
