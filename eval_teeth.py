@@ -31,7 +31,7 @@ def dice_score_multiclass(y_true, y_pred, ignore_background=True, eps=1e-6):
 
     mean_dice = np.mean(list(dice_per_class.values()))
 
-    return mean_dice, dice_per_class
+    return mean_dice #, dice_per_class
 
 
 def num_extractor_help(path):
