@@ -14,7 +14,7 @@ def num_extractor_help(path):
 
 def main(data_path):
 
-    pred_path = '../evaluation/eval_results_jenkins/'
+    pred_path = 'evaluation/eval_results_jenkins/'
     dice_scores = []
 
     for i in os.listdir(pred_path):
