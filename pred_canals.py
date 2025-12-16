@@ -4,7 +4,7 @@ import argparse
 from tqdm import tqdm
 
 def main(data_path, file_from, num_files):
-    PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
+    PATH1 = 'models/weights/tooth_fairy_3d_best_agh.pt'
     FILE = file_from    
 
     for i in tqdm(range(num_files)):
