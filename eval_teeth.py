@@ -52,7 +52,7 @@ def main(data_path):
         
         print(gt_path_canal)
 
-        dice_score = dice(load_itk(pred_path_canal), load_itk(gt_path_canal))
+        dice_score = dice_score_multiclass(load_itk(pred_path_canal), load_itk(gt_path_canal))
         dice_scores.append(dice_score)
         print(f"Dice score: {dice_score}")
 
