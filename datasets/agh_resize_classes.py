@@ -37,7 +37,7 @@ class AGH_Resize_Classes(Dataset):
             self.lista = init_tooth_fairy(self.data_directory)
         else:
             self.lista = init_agh(self.data_directory)
-            test_teeth = load_index_json('../data_split.json')
+            test_teeth = load_index_json('data_split.json')
 
             # for idx, item in enumerate(self.lista):
             #     if item[1].split('/')[-1].split('.')[0] in test_teeth:
