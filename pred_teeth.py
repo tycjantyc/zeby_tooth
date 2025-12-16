@@ -10,7 +10,7 @@ def main(data_path, file_from, num_files):
 
     FILE = file_from    
     model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
-    model.load_state_dict(load('../models/weights/agh_segmentor_best_2.pt', weights_only=True))
+    model.load_state_dict(load('models/weights/agh_segmentor_best_2.pt', weights_only=True))
     model.eval()
     model = model.cuda()
 
