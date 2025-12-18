@@ -24,7 +24,6 @@ def main(data_path, file_from, num_files):
         out = f'evaluation/eval_results_jenkins/pred_teeth_mask_{i}.nii.gz'
 
         instance_teeth_segment(model, file_semantic, file_instance, helper)
-
         main_watershed(seed_mask=helper, ws_mask=file_semantic, out=out)
 
         FILE += 1
