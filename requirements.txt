@@ -16,3 +16,4 @@ torchinfo
 nibabel
 h5py
 diffusers
+matplotlib
