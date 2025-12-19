@@ -3,8 +3,8 @@ from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
 import argparse
 from tqdm import tqdm
 
-def main(data_path, file_from, num_files):
-    PATH1 = 'models/weights/tooth_fairy_3d_best_agh.pt'
+def main(data_path, file_from, num_files, path = 'models/weights/tooth_fairy_3d_best.pt'):
+    PATH1 = path
     FILE = file_from    
 
     for i in tqdm(range(num_files)):
@@ -27,9 +27,10 @@ if __name__ == "__main__":
     arg_parser.add_argument('--data_path', type=str, required=False, default='D:/ToothFairy3')
     arg_parser.add_argument('--file_from', type=int, required=False, default=1)
     arg_parser.add_argument('--num_files', type=int, required=False, default=10)
+    arg_parser.add_argument('--weights_path', type=str, required=False)
     
     args = arg_parser.parse_args()
 
-    main(args.data_path, args.file_from, args.num_files)
+    main(args.data_path, args.file_from, args.num_files, args.weights_path)
 
     
