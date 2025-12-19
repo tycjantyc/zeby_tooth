@@ -5,7 +5,7 @@ def validation_spliter(lista, validation_mode = True, validation_split = 0.05):
     
     split_index = int(len(lista) * validation_split)
 
-    lista = random.Random(4).shuffle(lista)
+    random.Random(4).shuffle(lista)
     
     if validation_mode:
         return lista[:split_index]
