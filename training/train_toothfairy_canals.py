@@ -105,6 +105,8 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
         tc.cuda.empty_cache()
         print("Cache emptied!")
     
+    tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_last.pt')
+
     plt.plot(range(1, num_epochs+1), train_losses)
     plt.plot(range(1, num_epochs+1), validation_losses)
     plt.legend(['train', 'validation'])
