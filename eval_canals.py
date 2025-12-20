@@ -16,6 +16,7 @@ def num_extractor_help(path):
 
 def main(data_path):
 
+    acceptable_canal_indexes = [int(i.split('.')[0]) for i in os.listdir(os.path.join(data_path, 'db1_v1.0','db1_v1.0_nifti_root_canal_masks_single_cls_ref'))]
     pred_path = 'evaluation/eval_results_jenkins/'
     dice_scores = []
 
@@ -25,6 +26,10 @@ def main(data_path):
             continue
 
         pred_path_canal = os.path.join(pred_path, i)
+
+        if not num_extractor_help(pred_path_canal) in acceptable_canal_indexes:
+            continue
+
         gt_path_canal = os.path.join(data_path, 'db1_v1.0','db1_v1.0_nifti_root_canal_masks_single_cls_ref',f'{num_extractor_help(pred_path_canal)}.nii.gz')
         
         print(gt_path_canal)
