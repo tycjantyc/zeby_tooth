@@ -6,15 +6,7 @@ from processing.tooth_fairy_classes import teeth_instance, teeth_semantic
 from processing.prepare_tooth_fairy_data import prepare_toothfairy
 from monai.transforms import Resize
 from datasets.init import init_agh, validation_spliter, init_tooth_fairy
-import json
-
-def load_index_json(file_path):
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    test_canals = [int(x) for x in data["test_teeth"]]
-
-    return test_canals
+from processing.data_augmentation import *
 
 class AGH_Resize_Classes(Dataset):
     
@@ -37,20 +29,8 @@ class AGH_Resize_Classes(Dataset):
             self.lista = init_tooth_fairy(self.data_directory)
         else:
             self.lista = init_agh(self.data_directory)
-            test_teeth = load_index_json('data_split.json')
-
-            # for idx, item in enumerate(self.lista):
-            #     if item[1].split('/')[-1].split('.')[0] in test_teeth:
-            #         self.lista.pop(idx)
-            
-            for idx in test_teeth:
-                for i in self.lista:
-                    if i[1].split('/')[-1].split('.')[0] == str(idx):
-                        self.lista.remove(i)
-
-
         self.lista = validation_spliter(self.lista, validation_mode=self.validation_mode, validation_split=self.validation_split)
-                       
+                   
     def __len__(self):
 
         return len(self.lista)
@@ -88,6 +68,15 @@ class AGH_Resize_Classes(Dataset):
         
         label_weak = down.__call__(label_weak[None, ...])
         label = down.__call__(label[None, ...])[0]
+
+        # MONAI Resize returns MetaTensor; convert to numpy for torchio.
+        label_weak = np.asarray(label_weak)
+        label = np.asarray(label)
+
+        if self.augmentation:
+            factory = AugmentationFactory()
+            label_weak, label = factory.create(label_weak[0], label, teeth=True)
+        #dodać augemnetacje!!!!
 
         return label_weak, label
     

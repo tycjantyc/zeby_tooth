@@ -1,7 +1,7 @@
 tqdm
 numpy
 monai
-timm
+timm==1.0.22
 numpy
 accelerate
 diffusers

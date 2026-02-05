@@ -16,7 +16,7 @@ from monai.losses import DiceLoss
 import torch.nn.functional as F
 
 def instance_teeth_segment(model, file_semantic, file_instance, out):
-    LOSS = DiceLoss(include_background=False, reduction = 'mean') 
+    LOSS = DiceLoss(include_background=False, reduction = 'none') 
     
     image = load_itk(file_semantic)
     if file_instance is not None:
@@ -72,7 +72,6 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
 
 
     if file_instance is not None:
-        # output = tc.argmax(output, dim=1)
         clean_output = F.one_hot(label.long(), num_classes=34)
         clean_output = clean_output.permute(0, 4, 1, 2, 3).float()
 
@@ -86,6 +85,7 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
     output = up.__call__(output[None, ...])[0]
     temp = np.zeros(load_itk(file_semantic).shape)
     z_min, z_max, y_min, y_max, x_min, x_max = coords
+    print(output.dtype)
     temp[z_min:z_max, y_min:y_max, x_min:x_max] = output
     output = temp
 
@@ -98,15 +98,16 @@ def instance_teeth_segment(model, file_semantic, file_instance, out):
     # nib.save(nifti_img2, '../evaluation/evaluation_results/output_image_2_mask.nii.gz')
     # nifti_img3 = nib.Nifti1Image(label_weak[0].numpy().astype(np.uint8), affine)
     # nib.save(nifti_img3, '../evaluation/evaluation_results/output_image_2_01.nii.gz')
+    print("DONE!")
 
 if __name__ == "__main__":
     model = build_class_segmentor_model(inchannels=1, outchannels=34, depths=[32, 64, 128, 256, 384])
-    #model.load_state_dict(tc.load('../models/weights/agh_segmentor_best_2.pt', weights_only=True))
-    model.load_state_dict(tc.load("C:/Users/Jan/Desktop/tooth_fairy_challenge/models/weights/agh_segmentor_best_2.pt", weights_only=True))
-    for i in range(1, 6, 1):
-        file_semantic = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/{i}.nii.gz'
-        file_instance = f'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/{i}.nii.gz'
-        out = f'../evaluation/evaluation_results/ok_{i}.nii.gz'
+    model.load_state_dict(tc.load('../models/weights/agh_segmentor_best_2.pt', weights_only=True)) #best_2 są ok!
+    #model.load_state_dict(tc.load("C:/Users/Jan/Desktop/weights_tooth_fairy/agh_segmentor_best.pt", weights_only=True))
 
-        instance_teeth_segment(model, file_semantic, file_instance, out)
+    file_semantic = 'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_single_cls_weak/25.nii.gz'
+    file_instance = None #'D:/db1_v1.0/db1_v1.0_nifti_teeth_masks_multi_cls_ordered_weak/17.nii.gz'
+    out = '../evaluation/evaluation_results/prediction_sepration_25.nii.gz'
+
+    instance_teeth_segment(model, file_semantic, file_instance, out)
 

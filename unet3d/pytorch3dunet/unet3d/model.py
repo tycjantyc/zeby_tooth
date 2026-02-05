@@ -274,3 +274,4 @@ def is_model_2d(model):
     if isinstance(model, nn.DataParallel):
         model = model.module
     return isinstance(model, UNet2D)
+    

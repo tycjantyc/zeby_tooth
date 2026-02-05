@@ -5,7 +5,6 @@ from pathlib import Path
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
 from monai.losses import DiceFocalLoss
 
 def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs, lambda_dice = 1.0, lambda_focal = 1.0, alpha = 0.99):
@@ -28,11 +27,8 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
     global_step = 0
     global_loss = 100
 
-    train_losses = []
-    validation_losses = []
-
     for epoch in range(num_epochs):
-        progress_bar = tqdm(total=len(train_dataloader), ncols=100, dynamic_ncols=False, leave=False)
+        progress_bar = tqdm(total=len(train_dataloader), ncols=100, dynamic_ncols=True)
         progress_bar.set_description(f"Epoch {epoch}")
 
         loss_full = 0
@@ -67,7 +63,6 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
             loss_full += loss.item()
 
         loss_full = loss_full/len(train_dataloader)
-        train_losses.append(loss_full)
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
 
         loss_val_full = 0
@@ -90,8 +85,6 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
 
                 loss_val_full += loss.item()
 
-        validation_losses.append(loss_val_full/len(val_dataloader))
-
         if len(val_dataloader) > 0:
             loss_val_full = loss_val_full/len(val_dataloader)
             list_dices = np.array(list_dices)
@@ -104,12 +97,3 @@ def train_tooth_fairy_canals(model, optimizer, train_dataloader, val_dataloader,
 
         tc.cuda.empty_cache()
         print("Cache emptied!")
-    
-    tc.save(model.state_dict(), f'models/weights/tooth_fairy_3d_last.pt')
-
-    plt.plot(range(1, num_epochs+1), train_losses)
-    plt.plot(range(1, num_epochs+1), validation_losses)
-    plt.legend(['train', 'validation'])
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.savefig('losses.png')

@@ -73,6 +73,30 @@ def crop_to_mask(volume:  np.ndarray, mask: np.ndarray, padding=2, input = 96, c
         return cropped_volume, cropped_mask, (zmin, zmax, ymin, ymax, xmin, xmax)
     else:
         return cropped_volume, cropped_mask
+    
+
+def crop_to_mask_v2(volume:  np.ndarray, mask: np.ndarray, input = 128, return_coords = False):
+
+    slide = input//2
+
+    volume, mask = np.pad(volume, slide), np.pad(mask, slide)
+    coords = np.array(np.nonzero(mask))
+    
+    zmin, ymin, xmin = coords.min(axis=1)
+    zmax, ymax, xmax = coords.max(axis=1)
+
+    z = (zmax+zmin)//2
+    y = (ymax+ymin)//2 
+    x = (xmax+xmin)//2
+
+    cropped_volume = volume[z-slide:z+slide, y-slide:y+slide, x-slide:x+slide]
+    cropped_mask = mask[z-slide:z+slide, y-slide:y+slide, x-slide:x+slide]
+
+    if return_coords is False:
+        return cropped_volume, cropped_mask
+    
+    if return_coords is True:
+        return cropped_volume, cropped_mask, (zmin, ymin, xmin, zmax, ymax, xmax, slide)
 
 
 def create_random_snippet(image: np.ndarray, mask:np.ndarray, input_size: tuple[int, int, int], coords = False):
