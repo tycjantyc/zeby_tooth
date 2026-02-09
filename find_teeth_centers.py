@@ -8,6 +8,11 @@ from training.center_tooth import train_segmentor
 from processing.utils import norm_factory
 import argparse
 
+try:
+    from clearml import Task
+except ImportError:
+    Task = None
+
 def main(data_path = 'D:/db1_v1.0', 
          batch_size = 1, 
          min_clamp = -1000, 
@@ -75,8 +80,20 @@ if __name__ == '__main__':
     arg_parser.add_argument('--num_workers', type=int, required=False, default=0)
     arg_parser.add_argument('--pin_memory', required=False, default=False)
     arg_parser.add_argument('--prefetch_factor', required=False, default=None)
+    arg_parser.add_argument('--clearml_project', type=str, required=False, default='zeby_tooth')
+    arg_parser.add_argument('--clearml_task', type=str, required=False, default='find_teeth_centers')
+    arg_parser.add_argument('--clearml_queue', type=str, required=False, default=None)
 
     args = arg_parser.parse_args()
+
+    if Task is None:
+        raise RuntimeError("ClearML is not installed. Install it with `pip install clearml` or remove ClearML usage.")
+
+    task = Task.init(project_name=args.clearml_project, task_name=args.clearml_task)
+    task.connect(args)
+
+    if args.clearml_queue:
+        task.execute_remotely(queue_name=args.clearml_queue, exit_process=True)
 
     main(data_path=args.data_dir,
          num_epochs=args.num_epochs,

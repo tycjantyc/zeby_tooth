@@ -17,3 +17,4 @@ nibabel
 h5py
 diffusers
 matplotlib
+torch --index-url https://download.pytorch.org/whl/cu128
