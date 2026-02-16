@@ -29,7 +29,8 @@ def main(data_path = 'D:/db1_v1.0',
          freeze = False, 
          num_workers = 0,
          pin_memory = False,
-         prefetch_factor = None): 
+         prefetch_factor = None,
+         clearml_task = None): 
 
     if channels is None:
         channels = []
@@ -62,7 +63,15 @@ def main(data_path = 'D:/db1_v1.0',
         num_training_steps=(len(train_dataloader) * num_epochs),
     )
 
-    train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs)
+    train_segmentor(
+        model,
+        optimizer,
+        train_dataloader,
+        val_dataloader,
+        lr_scheduler,
+        num_epochs,
+        clearml_task=clearml_task,
+    )
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
@@ -108,5 +117,6 @@ if __name__ == '__main__':
          crop = args.crop,
          num_workers=args.num_workers,
          pin_memory=args.pin_memory,
-         prefetch_factor=args.prefetch_factor
+         prefetch_factor=args.prefetch_factor,
+         clearml_task=task,
          )

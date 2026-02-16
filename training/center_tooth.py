@@ -326,7 +326,7 @@ import numpy as np
 from monai.losses import DiceFocalLoss, DiceLoss, FocalLoss
 from training.hungarian_method import HungarianDiceCriterion3D
 
-def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs):
+def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_scheduler, num_epochs, clearml_task=None):
 
     CRITERION = CenterNetHeatmapLoss(alpha=1, beta=2.0) #DiceFocalLoss(include_background=False, sigmoid=True, softmax=False) #
     DEVICE = 'cuda:0'
@@ -346,6 +346,8 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
     model = model.to(DEVICE)
     global_step = 0
     global_loss = 100000
+    best_weights_path = Path("models/weights/agh_centroid_best.pt")
+    clearml_logger = clearml_task.get_logger() if clearml_task is not None else None
     
     for epoch in range(num_epochs):
         progress_bar = tqdm(total=len(train_dataloader), ncols=100, dynamic_ncols=True)
@@ -397,10 +399,15 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
             global_step += 1
 
             loss_full += loss.item()
+            if clearml_logger is not None and step % 10 == 0:
+                clearml_logger.report_scalar("train", "loss_step", loss.item(), global_step)
 
         loss_full = loss_full/(len(train_dataloader)-missed)
 
         training_losses.append(loss_full)
+        if clearml_logger is not None:
+            clearml_logger.report_scalar("train", "loss_epoch", loss_full, epoch + 1)
+            clearml_logger.report_scalar("train", "lr", lr_scheduler.get_last_lr()[0], epoch + 1)
 
         print(f'Epoch: {epoch + 1}, Loss: {loss_full:.7f}')
         loss_val_full = 0
@@ -438,17 +445,31 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
 
         gt_missed.append(gt_miss)
         pred_missed.append(pred_miss)
+        if clearml_logger is not None:
+            clearml_logger.report_scalar("val", "unmatched_gt", gt_miss, epoch + 1)
+            clearml_logger.report_scalar("val", "unmatched_pred", pred_miss, epoch + 1)
 
         if len(val_dataloader) > 0:
             loss_val_full = loss_val_full/(len(val_dataloader) - missed)
 
             validation_losses.append(loss_val_full)
+            if clearml_logger is not None:
+                clearml_logger.report_scalar("val", "loss_epoch", loss_val_full, epoch + 1)
             print(f'Epoch: {epoch + 1}, Validation Loss: {loss_val_full:.7f}')
 
         if loss_val_full < global_loss:
-            tc.save(model.state_dict(), f'models/weights/agh_centroid_best.pt')
+            tc.save(model.state_dict(), str(best_weights_path))
             print(f"Weights saved! - Epoch {epoch}")
             global_loss = loss_val_full
+            if clearml_task is not None:
+                try:
+                    clearml_task.upload_artifact(
+                        name="agh_centroid_best",
+                        artifact_object=str(best_weights_path),
+                        metadata={"epoch": int(epoch + 1), "val_loss": float(global_loss)},
+                    )
+                except Exception as ex:
+                    print(f"ClearML artifact upload failed: {ex}")
 
         tc.cuda.empty_cache()
         print("Cache emptied!")
@@ -461,6 +482,14 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
     plt.legend()
     plt.grid()
     plt.savefig('losses.png')
+    if clearml_logger is not None:
+        clearml_logger.report_matplotlib_figure(
+            title="training_curves",
+            series="losses",
+            iteration=num_epochs,
+            figure=plt.gcf(),
+            report_image=True,
+        )
 
     print(gt_missed)
     print(pred_missed)
