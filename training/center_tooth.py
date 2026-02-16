@@ -369,7 +369,7 @@ def train_segmentor(model, optimizer, train_dataloader, val_dataloader, lr_sched
             # print(clean_output.max())
             # print(tc.sum((clean_output == 1)*1)) #dane są okej!
 
-            clean_input = label_small[:, None, :, :, :].float().to(DEVICE)
+            clean_input = label_small.float().to(DEVICE) #[:, None, :, :, :]
             clean_output = clean_output.to(DEVICE)
 
             with accelerator.accumulate(model):
