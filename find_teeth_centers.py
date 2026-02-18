@@ -100,6 +100,9 @@ if __name__ == '__main__':
         task = Task.init(project_name=args.clearml_project, task_name=args.clearml_task)
         task.connect(args)
 
+    else:
+        task = None
+
     if args.clearml_queue:
         task.execute_remotely(queue_name=args.clearml_queue, exit_process=True)
 
