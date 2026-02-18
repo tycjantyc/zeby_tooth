@@ -95,11 +95,10 @@ if __name__ == '__main__':
 
     args = arg_parser.parse_args()
 
-    if Task is None:
-        raise RuntimeError("ClearML is not installed. Install it with `pip install clearml` or remove ClearML usage.")
-
-    task = Task.init(project_name=args.clearml_project, task_name=args.clearml_task)
-    task.connect(args)
+    if Task is not None:
+        
+        task = Task.init(project_name=args.clearml_project, task_name=args.clearml_task)
+        task.connect(args)
 
     if args.clearml_queue:
         task.execute_remotely(queue_name=args.clearml_queue, exit_process=True)
