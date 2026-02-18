@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     args = arg_parser.parse_args()
 
-    if Task is not None:
+    if Task is not None and args.clearml_task is not "None":
         
         task = Task.init(project_name=args.clearml_project, task_name=args.clearml_task)
         task.connect(args)
