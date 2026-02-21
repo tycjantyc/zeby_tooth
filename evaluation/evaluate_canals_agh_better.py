@@ -156,7 +156,7 @@ def eval(model, file_cbct, file_instance_seg, file_gt, out, infill = False):
 if __name__ == "__main__":
 
     PATH1 = '../../weights_tooth_fairy/tooth_fairy_3d_best_agh.pt'
-    FILE = 46
+    FILE = 56
     
     for i in range(10):
         
