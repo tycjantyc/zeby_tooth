@@ -1,0 +1,9 @@
+torch==2.10.0
+torchvision==0.25.0
+timm==1.0.22
+numpy
+scipy
+SimpleITK==2.5.3
+h5py
+scikit-image
+tqdm

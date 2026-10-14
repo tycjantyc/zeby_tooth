@@ -1,55 +1,62 @@
+"""Run one segmentation model and preserve the source NIfTI geometry."""
+
 import argparse
-from torch import load
-from evaluation.evaluate import evaluate
-from evaluation.evaluate_agh_segmentor import evaluate_agh
-from models.tooth_fairy_1 import build_hyspark_tooth_fairy_1
-from models.class_segmentor_model import build_class_segmentor_model
+from pathlib import Path
+
 import numpy as np
-import nibabel as nib
+import SimpleITK as sitk
+import torch
+
+from inference.pipeline import _load_model
+from inference.volume import read_volume, save_mask
 from processing.utils import norm_factory
 
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_weights", required=True)
+    parser.add_argument("--file", required=True)
+    parser.add_argument("--output", default="evaluation/evaluation_results/segmentation.nii.gz")
+    parser.add_argument("--normalization", default="01", choices=["01", "minmax", "none"])
+    parser.add_argument("--num_classes", type=int, help="Optional check against checkpoint channels")
+    parser.add_argument("--model_input", type=int, default=96)
+    parser.add_argument("--stride", type=int, default=48)
+    parser.add_argument("--model", choices=["hyspark", "resunet3dse"], help="Optional architecture check")
+    parser.add_argument("--device", default="auto")
+    parser.add_argument("--compression", help="Legacy compatibility option; output classes come from weights")
+    args = parser.parse_args()
+    device = args.device
+    if device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, inputs, classes = _load_model(args.model_weights, device)
+    if args.num_classes is not None and args.num_classes != classes:
+        parser.error(f"Checkpoint has {classes} output channels")
+    architecture = "hyspark" if model.__class__.__name__ == "Hybird" else "resunet3dse"
+    if args.model and args.model != architecture:
+        parser.error(f"Checkpoint architecture is {architecture}")
+    if inputs not in (1, 4):
+        parser.error("Supported checkpoints have 1 intensity channel or 4 channels with coordinates")
+    if architecture == "hyspark" and args.model_input != 96:
+        parser.error("Bundled HySpark checkpoints require --model_input 96")
+    if args.file.lower().endswith(".npy"):
+        reference = sitk.GetImageFromArray(np.load(args.file))
+    else:
+        reference, _ = read_volume(args.file)
+    output = Path(args.output)
+    if output.resolve() == Path(args.file).resolve():
+        parser.error("Output path must differ from the input")
+    if inputs == 4:
+        from evaluation.evaluate_agh_segmentor import evaluate_agh
+        evaluate = evaluate_agh
+    else:
+        from evaluation.evaluate import evaluate
+    labels = evaluate(model=model, file=args.file,
+                      model_input_shape=(args.model_input,) * 3,
+                      stride=(args.stride,) * 3, num_classes=classes,
+                      normalization_function=norm_factory(args.normalization), device=device)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    print(save_mask(labels, reference, output))
+
+
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--model_weights', type=str, required=False)
-    arg_parser.add_argument('--file', type=str, required=True)
-    arg_parser.add_argument('--compression', type=str, required=False, default='medium_rare', choices=['big', 'medium_rare', 'medium', 'none'])
-    arg_parser.add_argument('--normalization', type=str, required=False, default='01', choices=['standard', '01', 'none'])
-    arg_parser.add_argument('--num_classes', type=int, required=False)
-    arg_parser.add_argument('--model_input', type=int, required=False)
-    arg_parser.add_argument('--stride', type=int, required=False)
-    arg_parser.add_argument('--model', type=str, choices=['hyspark', 'resunet3dse'])
-    args = arg_parser.parse_args()
-
-    if args.model == 'hyspark':
-        model = build_hyspark_tooth_fairy_1(in_channel=1, n_classes=args.num_classes)
-    else:
-        model = build_class_segmentor_model(inchannels=1, outchannels=args.num_classes)
-
-    model.load_state_dict(load(args.model_weights, weights_only=True))
-    model.eval()
-
-    stride_shape = (args.stride, args.stride, args.stride)
-    input_shape = (args.model_input, args.model_input, args.model_input)
-
-    norm_func = norm_factory(args.normalization)
-    
-    if args.model == 'hyspark':
-        segmented_volume = evaluate(model = model, 
-                                file = args.file, 
-                                model_input_shape = input_shape,
-                                stride = stride_shape,
-                                num_classes = args.num_classes,  
-                                compression_function = args.compression,
-                                normalization_function = norm_func)
-    else:
-        segmented_volume = evaluate_agh(model = model, 
-                                file = args.file, 
-                                model_input_shape = input_shape,
-                                stride = stride_shape,
-                                num_classes = args.num_classes,  
-                                normalization_function = norm_func)
-
-
-    affine = np.eye(4)
-    nifti_img = nib.Nifti1Image(segmented_volume, affine)
-    nib.save(nifti_img, 'evaluation/evaluation_results/hungarian.nii.gz')
+    main()

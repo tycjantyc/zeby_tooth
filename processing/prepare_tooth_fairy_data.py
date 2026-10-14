@@ -1,7 +1,5 @@
 import numpy as np
 from processing.utils import create_random_snippet
-from processing.data_augmentation import AugmentationFactory
-from processing.multi_input import MultiInputFactory
 
 def prepare_toothfairy(image: np.ndarray, 
                        mask: np.ndarray, 
@@ -23,11 +21,15 @@ def prepare_toothfairy(image: np.ndarray,
         image = normalization_function(image)
 
         if augmentation:
+            from processing.data_augmentation import AugmentationFactory
             aug_factory = AugmentationFactory()
             image, mask = aug_factory.create(image, mask)
 
-        multi_input = MultiInputFactory(channels)
-        image = multi_input.create(image)
+        if channels:
+            from processing.multi_input import MultiInputFactory
+            image = MultiInputFactory(channels).create(image)
+        else:
+            image = image[None, ...]
 
         if coords:
             return image, mask, coordinations
